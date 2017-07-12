@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by SdlRaytracer.rc
+// Used by SoftTracer.rc
 
 // Valori predefiniti successivi per i nuovi oggetti
 // 

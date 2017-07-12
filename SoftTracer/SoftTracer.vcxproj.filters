@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="File di origine\Graphics">
+      <UniqueIdentifier>{79347a6e-00b8-4afb-82bb-b95668a4da8f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="File di origine\Interface">
+      <UniqueIdentifier>{d557134f-a5c4-498a-a174-1108842d1527}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Run.cpp">
@@ -21,17 +27,20 @@
     <ClCompile Include="Time.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="Interface\Mailbox.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="Interface\CallableAlgorithm.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
     <ClCompile Include="Renderers\Raytracer.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="Renderers\Test.cpp">
       <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Graphics.cpp">
+      <Filter>File di origine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Interface\Mailbox.cpp">
+      <Filter>File di origine\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="Interface\Parameters.cpp">
+      <Filter>File di origine\Interface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -41,17 +50,23 @@
     <ClInclude Include="Time.h">
       <Filter>File di origine</Filter>
     </ClInclude>
-    <ClInclude Include="Interface\Mailbox.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="Interface\CallableAlgorithm.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
     <ClInclude Include="Renderers\Raytracer.h">
       <Filter>File di origine</Filter>
     </ClInclude>
     <ClInclude Include="Renderers\Test.h">
       <Filter>File di origine</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Graphics.h">
+      <Filter>File di origine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface\CallableAlgorithm.h">
+      <Filter>File di origine\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface\Mailbox.h">
+      <Filter>File di origine\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface\Parameters.h">
+      <Filter>File di origine\Interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

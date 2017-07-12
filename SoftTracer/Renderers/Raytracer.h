@@ -1,6 +1,5 @@
 #pragma once
 #include "../Interface/CallableAlgorithm.h"
-#include "../Interface/Mailbox.h"
 
 class Raytracer : public CallableAlgorithm {
 private:
@@ -14,5 +13,5 @@ public:
 
 	void initialize_scene();
 
-	void render(void* target, MailBox* mailbox, const void* parameters);
+	void render(void* target, void* mailbox, const void* parameters);
 };

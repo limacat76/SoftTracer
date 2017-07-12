@@ -1,6 +1,5 @@
 #pragma once
 #include "../Interface/CallableAlgorithm.h"
-#include "../Interface/Mailbox.h"
 
 class Test : public CallableAlgorithm {
 private:
@@ -14,7 +13,7 @@ public:
 
 	void initialize_scene();
 
-	void render(void* target, MailBox* mailbox, const void* parameters);
+	void render(void* target, void* mailbox, const void* parameters);
 };
 
 class Bands : public CallableAlgorithm {
@@ -29,7 +28,7 @@ public:
 
 	void initialize_scene();
 
-	void render(void* target, MailBox* mailbox, const void* parameters);
+	void render(void* target, void* mailbox, const void* parameters);
 };
 
 class Noise : public CallableAlgorithm {
@@ -44,5 +43,5 @@ public:
 
 	void initialize_scene();
 
-	void render(void* target, MailBox* mailbox, const void* parameters);
+	void render(void* target, void* mailbox, const void* parameters);
 };

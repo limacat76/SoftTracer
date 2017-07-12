@@ -1,48 +1,17 @@
 #include <iostream>
-#include <random>
-#include <limits>
 #include <ctime>
 #include <chrono>
+#include <vector>
 #include <thread>
 #include <SDL.h>
 #include <conio.h>
-#include "Time.h"
+#include "Interface/CallableAlgorithm.h"
+#include "Interface/Mailbox.h"
+#include "Interface/Parameters.h"
+#include "Graphics/Graphics.h"
 #include "Renderers/Test.h"
 #include "Renderers/Raytracer.h"
-#include "Interface/Mailbox.h"
-
-uint32_t* make_picture_noise(int width, int height) {
-	std::random_device rd;
-	std::mt19937_64 eng(rd());
-	std::uniform_int_distribution<uint32_t> distr;
-	const uint32_t all_alpha = 255 << 24;
-
-	uint32_t* aPicture = new uint32_t[width * height];
-	for (int row = 0; row < height; row++) {
-		for (int column = 0; column < width; column++) {
-			aPicture[row * width + column] = distr(eng) | all_alpha;
-		}
-	}
-	return aPicture;
-}
-
-uint32_t* make_picture_test(int width, int height) {
-	uint32_t* aPicture = new uint32_t[width * height];
-	for (int row = 0; row < height; row++) {
-		for (int column = 0; column < width; column++) {
-			aPicture[row * width + column] =
-				row % 255 << 16 +
-				column % 255 << 8 +
-				row + column % 255;
-		}
-	}
-	return aPicture;
-}
-
-uint32_t* make_picture_blank(int width, int height) {
-	uint32_t* aPicture = new uint32_t[width * height]{ 0 };
-	return aPicture;
-}
+#include "Time.h"
 
 std::vector<std::thread> threads;
 
@@ -53,13 +22,13 @@ int main(int argc, char *argv[]) {
 
 	SDL_Event event;
 	SDL_Init(SDL_INIT_VIDEO);
-	SDL_Window* window = SDL_CreateWindow("Raytracer with an SDL Output", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
+	SDL_Window* window = SDL_CreateWindow("SDLSoftTracer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
 	SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, width, height);
 
-	uint32_t* pixels = new uint32_t[width * height];
-	uint32_t* image = make_picture_blank(width, height);
+	pixel* image = new pixel[width * height];
+	make_picture_blank(image, width, height);
 
 	std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
 	std::time_t start_time = std::chrono::system_clock::to_time_t(start);
@@ -75,7 +44,7 @@ int main(int argc, char *argv[]) {
 
 	for (int i = 0; i < no_threads; i++) {
 		parameters[i] = Parameters(i, no_threads, width, height);
-		threads.push_back(std::thread(&CallableAlgorithm::render, ta, pixels, mailbox, (const void *)&parameters[i]));
+		threads.push_back(std::thread(&CallableAlgorithm::render, ta, image, mailbox, (const void *)&parameters[i]));
 	}
 
 	int frames = 0;
@@ -86,7 +55,7 @@ int main(int argc, char *argv[]) {
 	int remainingFrames = 60;
 	while (!quit) {
 		if (copy) {
-			SDL_UpdateTexture(texture, NULL, pixels, width * sizeof(uint32_t));
+			SDL_UpdateTexture(texture, NULL, image, width * sizeof(uint32_t));
 		}
 		if (!allClosed) {
 			bool found = true;
@@ -154,8 +123,9 @@ int main(int argc, char *argv[]) {
 		std::cout << " finished at " << mailbox->to_main_finish_working_time[i] << "\n";
 	}
 
-	delete[] pixels;
 	delete[] image;
+	delete[] parameters;
+	delete mailbox;
 	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
@@ -164,7 +134,11 @@ int main(int argc, char *argv[]) {
 	std::chrono::duration<double> elapsed_seconds = end - start;
 	std::cout << "finished computation at " << limacat::take_my_time() << "elapsed time: " << elapsed_seconds.count() << "s\n";
 	std::cout << "Rendered " << frames << " frames @" << frames / elapsed_seconds.count() << " fps \n";
+
+#pragma warning( push ) 
+#pragma warning( disable : 6031) 
 	_getch();
-	
+#pragma warning( pop ) 
+
 	return 0;
 }
