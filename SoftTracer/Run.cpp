@@ -15,7 +15,15 @@
 
 std::vector<std::thread> threads;
 
+void printDefines() {
+#ifdef EIGEN_MPL2_ONLY
+	std::cout << "compiled with EIGEN_MPL2_ONLY" << "\n";
+#endif
+}
+
 int main(int argc, char *argv[]) {
+	printDefines();
+
 	const int width = 1920;
 	const int height = 1080;
 	bool quit = false;
@@ -56,6 +64,9 @@ int main(int argc, char *argv[]) {
 	while (!quit) {
 		if (copy) {
 			SDL_UpdateTexture(texture, NULL, image, width * sizeof(uint32_t));
+			SDL_RenderClear(renderer);
+			SDL_RenderCopy(renderer, texture, NULL, NULL);
+			SDL_RenderPresent(renderer);
 		}
 		if (!allClosed) {
 			bool found = true;
@@ -104,11 +115,6 @@ int main(int argc, char *argv[]) {
 				break;
 			}
 		}
-		if (copy) {
-			SDL_RenderClear(renderer);
-			SDL_RenderCopy(renderer, texture, NULL, NULL);
-			SDL_RenderPresent(renderer);
-		}
 	}
 	if (!allClosed) {
 		std::cout << "Closed before" << "\n";
@@ -135,6 +141,7 @@ int main(int argc, char *argv[]) {
 	std::cout << "finished computation at " << limacat::take_my_time() << "elapsed time: " << elapsed_seconds.count() << "s\n";
 	std::cout << "Rendered " << frames << " frames @" << frames / elapsed_seconds.count() << " fps \n";
 
+	std::cout << "Press any key to exit \n";
 #pragma warning( push ) 
 #pragma warning( disable : 6031) 
 	_getch();
