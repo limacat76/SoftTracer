@@ -6,11 +6,9 @@ class Raytracer : public CallableAlgorithm {
 private:
 
 public:
-	Raytracer() {
-	}
+	Raytracer();
 
-	~Raytracer() {
-	}
+	~Raytracer();
 
 	void initialize_scene();
 

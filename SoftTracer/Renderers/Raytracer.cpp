@@ -1,4 +1,19 @@
 #include "Raytracer.h"
+#ifdef _DEBUG
+#include <iostream>
+#endif
+
+Raytracer::Raytracer() {
+#ifdef _DEBUG
+	std::cout << "ctor called! \n";
+#endif
+}
+
+Raytracer::~Raytracer() {
+#ifdef _DEBUG
+	std::cout << "dtor called! \n";
+#endif
+}
 
 void Raytracer::initialize_scene() {
 	// Bands does not need to initialize a scene...

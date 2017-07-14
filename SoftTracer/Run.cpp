@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 
 	for (int i = 0; i < no_threads; i++) {
 		parameters[i] = Parameters(i, no_threads, width, height);
-		threads.push_back(std::thread(&CallableAlgorithm::render, ta, pixels, mailbox, (const void *)&parameters[i]));
+		threads.push_back(std::thread(&CallableAlgorithm::render, &ta, pixels, mailbox, (const void *)&parameters[i]));
 	}
 
 	int frames = 0;
