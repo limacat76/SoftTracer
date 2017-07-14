@@ -12,11 +12,6 @@ const float EPSILON = 0.0001f;
 */
 const int TRACE_DEPTH = 6;
 
-enum IntersectionStatus {
-	INSIDE = -1,
-	MISS = 0,
-	HIT = 1
-};
 
 class Raytracer : public CallableAlgorithm {
 private:
