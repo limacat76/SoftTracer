@@ -43,7 +43,8 @@ int main(int argc, char *argv[]) {
 	std::cout << "starting computation at " << limacat::take_my_time();
 
 	const int no_threads = 1;
-	JBEngine ta;
+	Raytracer ta;
+	// Attempt1::JBEngine ta;
 	ta.initialize_scene(new Parameters(-1, no_threads, width, height));
 
 	MailBox* mailbox = new MailBox(no_threads);

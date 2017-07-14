@@ -50,6 +50,8 @@ void Raytracer::render(void* target, void* mailbox, const void* parameters) {
 	my_mailbox->work_done(thread_no);
 }
 
+namespace Attempt1 {
+
 JBEngine::JBEngine() {
 #ifdef _DEBUG
 	std::cout << "construtor called\n";
@@ -196,7 +198,4 @@ void JBEngine::render(void* target, void* mailbox, const void* parameters) {
 	my_mailbox->work_done(thread_no);
 }
 
-
-
-
-
+}

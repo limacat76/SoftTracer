@@ -26,6 +26,8 @@ public:
 	void render(void* target, void* mailbox, const void* parameters);
 };
 
+namespace Attempt1 {
+
 // Ported from Jacco Bikker 2004 Tutorial engine
 class JBEngine : public CallableAlgorithm {
 protected:
@@ -52,3 +54,5 @@ private:
 //	bool Render();
 
 };
+
+}

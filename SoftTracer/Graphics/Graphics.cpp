@@ -27,6 +27,8 @@ void make_picture_blank(pixel* a_picture, int width, int height) {
 	pixel* aPicture = new pixel[width * height]{ 0 };
 }
 
+namespace Attempt1 { 
+
 Material::Material() : m_color(0), reflection(0.0), diffuse(0.0) {
 	;
 }
@@ -235,5 +237,7 @@ void Scene::initialize_scene() {
 	primitives[4] = new Sphere(Eigen::Vector3f(2.0f, 5.0f, 1.0f), 0.1f, "light source 2", Material(Color(0.7f, 0.7f, 0.9f)), true);
 //	primitives[5] = new Sphere(Eigen::Vector3f(1.0f, 2, 5), 10.0f, "fanculo sphere", Material(Color(0.7f, 0.7f, 1.0f), 1.0f, 0.1f));
 	primitives_number = 5;
+
+}
 
 }

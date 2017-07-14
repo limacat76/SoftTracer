@@ -21,6 +21,8 @@ const float  pi = 3.14159265358979f;
 // REFACTOR_TO_NAMESPACE SOFTTRACER::MATHS
 const double pi_d = 3.141592653589793238463;
 
+namespace Attempt1 {
+
 enum IntersectionStatus {
 	INSIDE = -1,
 	MISS = 0,
@@ -187,3 +189,5 @@ color Color(Eigen::Vector3f a_vector);
 std::vector< float > Array(color a_color);
 
 Eigen::Vector3f Vector(color a_color);
+
+}
