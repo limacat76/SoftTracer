@@ -4,12 +4,12 @@
 #include <ctime>
 #include <chrono>
 #include <thread>
-#include <SDL.h>
 #include <conio.h>
 #include "Time.h"
 #include "Renderers/Test.h"
 #include "Renderers/Raytracer.h"
 #include "Interface/Mailbox.h"
+#include "Interface/Target.h"
 
 uint32_t* make_picture_noise(int width, int height) {
 	std::random_device rd;
@@ -51,15 +51,10 @@ int main(int argc, char *argv[]) {
 	const int height = 1080;
 	bool quit = false;
 
-	SDL_Event event;
-	SDL_Init(SDL_INIT_VIDEO);
-	SDL_Window* window = SDL_CreateWindow("Raytracer with an SDL Output", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
-	SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, width, height);
-
 	uint32_t* pixels = new uint32_t[width * height];
 	uint32_t* image = make_picture_blank(width, height);
+	// Headless target;
+	SDLTarget target(pixels, width, height);
 
 	std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
 	std::time_t start_time = std::chrono::system_clock::to_time_t(start);
@@ -80,14 +75,11 @@ int main(int argc, char *argv[]) {
 
 	int frames = 0;
 	const int hz = 1000 / 24;
-	bool copy = true;
 	bool allClosed = false;
 	std::chrono::time_point<std::chrono::system_clock> end;
-	int remainingFrames = 60;
+
 	while (!quit) {
-		if (copy) {
-			SDL_UpdateTexture(texture, NULL, pixels, width * sizeof(uint32_t));
-		}
+		target.loop(quit, frames, allClosed);
 		if (!allClosed) {
 			bool found = true;
 			for (int i = 0; found && i < no_threads; i++) {
@@ -99,46 +91,8 @@ int main(int argc, char *argv[]) {
 				end = std::chrono::system_clock::now();
 			}
 		}
-		if (!allClosed || remainingFrames > 0) {
-			if (allClosed) {
-				remainingFrames--;
-			}
-			while (SDL_PollEvent(&event) != 0) {
-				switch (event.type) {
-				case SDL_QUIT:
-					quit = true;
-					mailbox->to_children_quit = true;
-					break;
-				case SDL_KEYDOWN:
-					if (event.key.keysym.sym == SDLK_ESCAPE) {
-						quit = true;
-						mailbox->to_children_quit = true;
-					} else if (event.key.keysym.sym == SDLK_x) {
-						copy = !copy;
-					}
-					break;
-				}
-			}
-			frames++;
-		} else {
-			SDL_WaitEvent(&event);
-			switch (event.type) {
-			case SDL_QUIT:
-				quit = true;
-				break;
-			case SDL_KEYDOWN:
-				if (event.key.keysym.sym == SDLK_ESCAPE) {
-					quit = true;
-				} else if (event.key.keysym.sym == SDLK_x) {
-					copy = !copy;
-				}
-				break;
-			}
-		}
-		if (copy) {
-			SDL_RenderClear(renderer);
-			SDL_RenderCopy(renderer, texture, NULL, NULL);
-			SDL_RenderPresent(renderer);
+		if (quit) {
+			mailbox->to_children_quit = true;
 		}
 	}
 	if (!allClosed) {
@@ -154,12 +108,9 @@ int main(int argc, char *argv[]) {
 		std::cout << " finished at " << mailbox->to_main_finish_working_time[i] << "\n";
 	}
 
+	target.stop();
 	delete[] pixels;
 	delete[] image;
-	SDL_DestroyTexture(texture);
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
 	std::cin.clear();
 	std::chrono::duration<double> elapsed_seconds = end - start;
 	std::cout << "finished computation at " << limacat::take_my_time() << "elapsed time: " << elapsed_seconds.count() << "s\n";

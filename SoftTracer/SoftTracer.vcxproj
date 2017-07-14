@@ -142,6 +142,7 @@
   <ItemGroup>
     <ClCompile Include="Interface\CallableAlgorithm.cpp" />
     <ClCompile Include="Interface\Mailbox.cpp" />
+    <ClCompile Include="Interface\Target.cpp" />
     <ClCompile Include="Renderers\Raytracer.cpp" />
     <ClCompile Include="Renderers\Test.cpp" />
     <ClCompile Include="Run.cpp" />
@@ -150,6 +151,7 @@
   <ItemGroup>
     <ClInclude Include="Interface\CallableAlgorithm.h" />
     <ClInclude Include="Interface\Mailbox.h" />
+    <ClInclude Include="Interface\Target.h" />
     <ClInclude Include="Renderers\Raytracer.h" />
     <ClInclude Include="Renderers\Test.h" />
     <ClInclude Include="resource.h" />
