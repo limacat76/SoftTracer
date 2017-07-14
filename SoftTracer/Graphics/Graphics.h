@@ -92,6 +92,8 @@ public:
 
 	std::string get_name();
 
+	virtual Material get_material();
+
 protected:
 	const Material material;
 
@@ -178,3 +180,10 @@ private:
 	Primitive** primitives;
 };
 
+color Color(float red, float green, float blue);
+
+color Color(Eigen::Vector3f a_vector);
+
+std::vector< float > Array(color a_color);
+
+Eigen::Vector3f Vector(color a_color);

@@ -5,7 +5,7 @@
 #include "../Interface/Parameters.h"
 #include "Test.h"
 
-void Test::initialize_scene() {
+void Test::initialize_scene(const void* parameters) {
 	// Test does not need to initialize a scene...
 }
 
@@ -40,7 +40,7 @@ void Test::render(void* target, void* mailbox, const void* parameters) {
 	my_mailbox->work_done(thread_no);
 }
 
-void Bands::initialize_scene() {
+void Bands::initialize_scene(const void* parameters) {
 	// Bands does not need to initialize a scene...
 }
 
@@ -77,7 +77,7 @@ void Bands::render(void* target, void* mailbox, const void* parameters) {
 	my_mailbox->work_done(thread_no);
 }
 
-void Noise::initialize_scene() {
+void Noise::initialize_scene(const void* parameters) {
 	// Noise does not need to initialize a scene...
 }
 

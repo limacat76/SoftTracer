@@ -11,7 +11,7 @@ public:
 	~Test() {
 	}
 
-	void initialize_scene();
+	void initialize_scene(const void* parameters);
 
 	void render(void* target, void* mailbox, const void* parameters);
 };
@@ -26,7 +26,7 @@ public:
 	~Bands() {
 	}
 
-	void initialize_scene();
+	void initialize_scene(const void* parameters);
 
 	void render(void* target, void* mailbox, const void* parameters);
 };
@@ -41,7 +41,7 @@ public:
 	~Noise() {
 	}
 
-	void initialize_scene();
+	void initialize_scene(const void* parameters);
 
 	void render(void* target, void* mailbox, const void* parameters);
 };

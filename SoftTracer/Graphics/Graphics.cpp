@@ -45,7 +45,7 @@ float Material::get_specular() {
 }
 
 float Material::get_diffuse() { 
-	return diffuse; 
+	return diffuse;
 }
 
 float Material::get_reflection() { 
@@ -125,7 +125,7 @@ int Sphere::intersect(Ray& a_ray, float& a_distance) {
 		det = sqrtf(det);
 		float i1 = b - det;
 		float i2 = b + det;
-		if (i2 > 0) {
+		if (i2 < 0) {
 			if (i1 < 0) {
 				if (i2 < a_distance) {
 					a_distance = i2;
@@ -179,6 +179,10 @@ Primitive* Scene::get_primitive(int at_index) {
 	return primitives[at_index];
 }
 
+Material Primitive::get_material() {
+	return material;
+}
+
 Scene::~Scene()
 {
 	delete[] primitives;
@@ -201,8 +205,26 @@ color Color(float red, float green, float blue) {
 	return 255 << 24 | ranged_int(red) << 16 | ranged_int(green) << 8 | ranged_int(blue);
 }
 
-void Scene::initialize_scene()
-{
+color Color(Eigen::Vector3f a_vector) {
+	return 255 << 24 | ranged_int(a_vector.x()) << 16 | ranged_int(a_vector.y()) << 8 | ranged_int(a_vector.z());
+}
+
+std::vector< float > Array(color a_color) {
+	std::vector< float > result;
+	result.push_back(((float)((0x00FF0000 & a_color) >> 16)) / 255);
+	result.push_back(((float)((0x0000FF00 & a_color) >> 8)) / 255);
+	result.push_back(((float)((0x000000FF & a_color))) / 255);
+	return result;
+}
+
+Eigen::Vector3f Vector(color a_color) {
+	float r = ((0x00FF0000 & a_color) >> 16) / 255;
+	float g = ((0x0000FF00 & a_color) >> 8) / 255;
+	float b = ((0x000000FF & a_color)) / 255;
+	return Eigen::Vector3f(r, g, b);
+}
+
+void Scene::initialize_scene() {
 	primitives = new Primitive*[100];
 
 	// ground plane
@@ -211,6 +233,7 @@ void Scene::initialize_scene()
 	primitives[2] = new Sphere(Eigen::Vector3f(-5.5f, -0.5, 7), 2.0f, "small sphere", Material(Color(0.7f, 0.7f, 1.0f), 1.0f, 0.1f));
 	primitives[3] = new Sphere(Eigen::Vector3f(0.0f, 5.0f, 5.0f), 0.1f, "light source 1", Material(Color(0.6f, 0.6f, 0.6f)), true);
 	primitives[4] = new Sphere(Eigen::Vector3f(2.0f, 5.0f, 1.0f), 0.1f, "light source 2", Material(Color(0.7f, 0.7f, 0.9f)), true);
+//	primitives[5] = new Sphere(Eigen::Vector3f(1.0f, 2, 5), 10.0f, "fanculo sphere", Material(Color(0.7f, 0.7f, 1.0f), 1.0f, 0.1f));
 	primitives_number = 5;
 
 }

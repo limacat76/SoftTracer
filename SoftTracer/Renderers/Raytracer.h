@@ -21,7 +21,7 @@ public:
 
 	~Raytracer();
 
-	void initialize_scene();
+	void initialize_scene(const void* parameters);
 
 	void render(void* target, void* mailbox, const void* parameters);
 };
@@ -30,30 +30,25 @@ public:
 class JBEngine : public CallableAlgorithm {
 protected:
 	// renderer data
-	float m_WX1, m_WY1, m_WX2, m_WY2, m_DX, m_DY, m_SX, m_SY;
-	Scene* m_Scene;
-	pixel* m_Dest;
-	int m_Width, m_Height, m_CurrLine, m_PPos;
-	Primitive** m_LastRow;
+	Scene* my_scene;
+
+	// float m_WX1, m_WY1, m_WX2, m_WY2, m_DX, m_DY, m_SX, m_SY;
+	int width, height;
+
+	//Primitive** m_LastRow;
 
 public:
 	JBEngine();
 
 	~JBEngine();
 
-	void initialize_scene();
+	void initialize_scene(const void* parameters);
 
 	void render(void* target, void* mailbox, const void* parameters);
 
 private:
-#ifdef _DEBUG
-	int my_thread_no;
-#endif
-
-//	void InitRender();
-//	void SetTarget(pixel* a_Dest, int a_Width, int a_Height);
-
+	color Raytrace(Ray& a_Ray, int a_Depth, float a_RIndex, float& a_Dist);
+	
 //	bool Render();
-//	Primitive* Raytrace(Ray& a_Ray, color& a_Acc, int a_Depth, float a_RIndex, float& a_Dist);
 
 };

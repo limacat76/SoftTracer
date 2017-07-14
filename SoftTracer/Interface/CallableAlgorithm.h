@@ -7,7 +7,7 @@ public:
 	virtual ~CallableAlgorithm() {
 	}
 
-	virtual void initialize_scene() = 0;
+	virtual void initialize_scene(const void* parameters) = 0;
 
 	/**
 	 * The render() function willfully does not specify neither the type of target, nor mailbox nor parameters,
