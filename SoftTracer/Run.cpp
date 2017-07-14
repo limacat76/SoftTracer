@@ -42,8 +42,8 @@ int main(int argc, char *argv[]) {
 	std::time_t start_time = std::chrono::system_clock::to_time_t(start);
 	std::cout << "starting computation at " << limacat::take_my_time();
 
-	const int no_threads = 8;
-	Raytracer ta;
+	const int no_threads = 1;
+	JBEngine ta;
 	ta.initialize_scene();
 
 	MailBox* mailbox = new MailBox(no_threads);

@@ -194,7 +194,7 @@ int ranged_int(float value) {
 		ranged = value;
 	}
 	ranged *= 255;
-	return ranged;
+	return (int)ranged;
 }
 
 color Color(float red, float green, float blue) {
