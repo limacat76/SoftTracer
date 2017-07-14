@@ -29,11 +29,11 @@ int main(int argc, char *argv[]) {
 	const int height = 1080;
 	bool quit = false;
 
-	// Headless target;
-	SDLTarget target(pixels, width, height);
 
 	pixel* image = new pixel[width * height];
 	make_picture_blank(image, width, height);
+	// Headless target;
+	SDLTarget target(image, width, height);
 
 	std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
 	std::time_t start_time = std::chrono::system_clock::to_time_t(start);
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 
 	for (int i = 0; i < no_threads; i++) {
 		parameters[i] = Parameters(i, no_threads, width, height);
-		threads.push_back(std::thread(&CallableAlgorithm::render, ta, image, mailbox, (const void *)&parameters[i]));
+		threads.push_back(std::thread(&CallableAlgorithm::render, &ta, image, mailbox, (const void *)&parameters[i]));
 	}
 
 	int frames = 0;
@@ -88,7 +88,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	target.stop();
-	delete[] pixels;
 	delete[] image;
 	std::cin.clear();
 	std::chrono::duration<double> elapsed_seconds = end - start;
