@@ -16,10 +16,10 @@ void make_picture_test(pixel* a_picture, int width, int height);
 void make_picture_blank(pixel* a_picture, int width, int height);
 
 // REFACTOR_TO_NAMESPACE SOFTTRACER::MATHS
-const float  pi = 3.14159265358979f; 
+const float  PI = 3.14159265358979f; 
 
 // REFACTOR_TO_NAMESPACE SOFTTRACER::MATHS
-const double pi_d = 3.141592653589793238463;
+const double PI_D = 3.141592653589793238463;
 
 namespace Attempt1 {
 

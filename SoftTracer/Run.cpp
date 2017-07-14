@@ -25,13 +25,12 @@ void printDefines() {
 int main(int argc, char *argv[]) {
 	printDefines();
 
-//	const int width = 1920;
-//	const int height = 1080;
-	const int width = 320;
-	const int height = 240;
+	const int width = 1920;
+	const int height = 1080;
+//	const int width = 320;
+//	const int height = 240;
 
 	bool quit = false;
-
 
 	pixel* image = new pixel[width * height];
 	make_picture_blank(image, width, height);
@@ -43,8 +42,9 @@ int main(int argc, char *argv[]) {
 	std::cout << "starting computation at " << limacat::take_my_time();
 
 	const int no_threads = 1;
-	Raytracer ta;
+	// Raytracer ta;
 	// Attempt1::JBEngine ta;
+	JBRaytracer::JBEngine ta;
 	ta.initialize_scene(new Parameters(-1, no_threads, width, height));
 
 	MailBox* mailbox = new MailBox(no_threads);
