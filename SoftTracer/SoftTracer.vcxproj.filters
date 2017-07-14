@@ -42,6 +42,9 @@
     <ClCompile Include="Interface\Parameters.cpp">
       <Filter>File di origine\Interface</Filter>
     </ClCompile>
+    <ClCompile Include="Interface\Target.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -67,6 +70,9 @@
     </ClInclude>
     <ClInclude Include="Interface\Parameters.h">
       <Filter>File di origine\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface\Target.h">
+      <Filter>File di origine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -5,7 +5,8 @@ For now it's just scaffolding, I expect to be able to import a RayTracer algorit
 ## Features
 Currently SoftTracer:
 - has been tested with a raytracing algorithm but that algorithm was ugly and it was set on fire.
-- uses SDL 2.0 as a canvas for displaying a CPU-rendered image and with tweaks to avoid hogging the cpu after the rendering finishes.
+- uses SDL 2.0 as a target for displaying a CPU-rendered image and with tweaks to avoid hogging the cpu after the rendering finishes.
+- it also has a headless target for debugging and profiling purposes.
 - uses multi threaded jobs.
 
 ## Getting Started
