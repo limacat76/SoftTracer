@@ -2,6 +2,9 @@
 #include "../Interface/Mailbox.h"
 #include "../Interface/Parameters.h"
 #include "Raytracer.h"
+#ifdef _DEBUG
+#include <iostream>
+#endif
 
 void Raytracer::initialize_scene() {
 	// Bands does not need to initialize a scene...
@@ -36,24 +39,33 @@ void Raytracer::render(void* target, void* mailbox, const void* parameters) {
 }
 
 JBEngine::JBEngine() {
-	m_Scene = new Scene();
+#ifdef _DEBUG
+	std::cout << "ctor called\n";
+#endif
 }
 
 JBEngine::~JBEngine() {
-	delete m_Scene;
+#ifdef _DEBUG
+	std::cout << my_thread_no << " dtor called\n";
+#endif
 }
 
 void JBEngine::initialize_scene() {
-
+	;
 }
 
 void JBEngine::render(void* target, void* mailbox, const void* parameters) {
+	Scene* m_Scene = new Scene();
+
 	pixel* image = (pixel*)target;
 
 	MailBox* my_mailbox = (MailBox *)mailbox;
 	const Parameters* my_parameters = (const Parameters *)parameters;
 
 	const int thread_no = my_parameters->threadNumber;
+#ifdef _DEBUG
+	my_thread_no = thread_no;
+#endif
 	const int total_threads = my_parameters->totalThreads;
 	const int band = my_parameters->height / total_threads;
 	const int startY = thread_no * band;
@@ -73,4 +85,5 @@ void JBEngine::render(void* target, void* mailbox, const void* parameters) {
 	}
 
 	my_mailbox->work_done(thread_no);
+	delete m_Scene;
 }

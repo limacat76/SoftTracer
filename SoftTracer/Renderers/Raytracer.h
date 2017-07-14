@@ -41,6 +41,11 @@ public:
 
 	void render(void* target, void* mailbox, const void* parameters);
 
+private:
+#ifdef _DEBUG
+	int my_thread_no;
+#endif
+
 //	void InitRender();
 //	void SetTarget(pixel* a_Dest, int a_Width, int a_Height);
 
