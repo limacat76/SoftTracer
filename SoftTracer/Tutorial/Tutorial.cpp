@@ -126,9 +126,9 @@ namespace JBikker {
 			// determine color at point of intersection
 			pi = a_Ray.GetOrigin() + a_Ray.GetDirection() * a_Dist;
 			// trace lights
-			for (int l = 0; l < m_Scene->GetNrPrimitives(); l++)
+			for (int a_light = 0; a_light < m_Scene->GetNrPrimitives(); a_light++)
 			{
-				Primitive* p = m_Scene->GetPrimitive(l);
+				Primitive* p = m_Scene->GetPrimitive(a_light);
 				if (p->IsLight())
 				{
 					Primitive* light = p;
