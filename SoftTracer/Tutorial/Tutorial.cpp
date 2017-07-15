@@ -132,26 +132,73 @@ namespace JBikker {
 				if (p->IsLight())
 				{
 					Primitive* light = p;
+					// handle point light source
+					float shade = 1.0f;
+					if (light->GetType() == Primitive::SPHERE)
+					{
+						vector3 L = ((Sphere*)light)->GetCentre() - pi;
+						float tdist = LENGTH(L);
+						L *= (1.0f / tdist);
+						Ray r = Ray(pi + L * EPSILON, L);
+						for (int s = 0; s < m_Scene->GetNrPrimitives(); s++)
+						{
+							Primitive* pr = m_Scene->GetPrimitive(s);
+							if ((pr != light) && (pr->Intersect(r, tdist)))
+							{
+								shade = 0;
+								break;
+							}
+						}
+					}
 					// calculate diffuse shading
 					vector3 L = ((Sphere*)light)->GetCentre() - pi;
 					NORMALIZE(L);
 					vector3 N = prim->GetNormal(pi);
 					if (prim->GetMaterial()->GetDiffuse() > 0)
 					{
-						float dot = DOT(N, L);
+						float dot = DOT(L, N);
 						if (dot > 0)
 						{
-							float diff = dot * prim->GetMaterial()->GetDiffuse();
+							float diff = dot * prim->GetMaterial()->GetDiffuse() * shade;
 							// add diffuse component to ray color
-							a_Acc += diff * prim->GetMaterial()->GetColor() * light->GetMaterial()->GetColor();
+							a_Acc += diff * light->GetMaterial()->GetColor() * prim->GetMaterial()->GetColor();
 						}
 					}
+					// determine specular component
+					if (prim->GetMaterial()->GetSpecular() > 0)
+					{
+						// point light source: sample once for specular highlight
+						vector3 V = a_Ray.GetDirection();
+						vector3 R = L - 2.0f * DOT(L, N) * N;
+						float dot = DOT(V, R);
+						if (dot > 0)
+						{
+							float spec = powf(dot, 20) * prim->GetMaterial()->GetSpecular() * shade;
+							// add specular component to ray color
+							a_Acc += spec * light->GetMaterial()->GetColor();
+						}
+					}
+				}
+			}
+			// calculate reflection
+			float refl = prim->GetMaterial()->GetReflection();
+			if (refl > 0.0f)
+			{
+				vector3 N = prim->GetNormal(pi);
+				vector3 R = a_Ray.GetDirection() - 2.0f * DOT(a_Ray.GetDirection(), N) * N;
+				if (a_Depth < TRACEDEPTH)
+				{
+					Color rcol(0, 0, 0);
+					float dist;
+					Raytrace(Ray(pi + R * EPSILON, R), rcol, a_Depth + 1, a_RIndex, dist);
+					a_Acc += refl * rcol * prim->GetMaterial()->GetColor();
 				}
 			}
 		}
 		// return pointer to primitive hit by primary ray
 		return prim;
 	}
+
 
 	// ---
 	// RAY
@@ -278,11 +325,11 @@ namespace JBikker {
 		// light source 1
 		m_Primitive[3] = new Sphere(vector3(0, 5, 5), 0.1f);
 		m_Primitive[3]->Light(true);
-		m_Primitive[3]->GetMaterial()->SetColor(Color(0.6f, 0.6f, 0.6f));
+		m_Primitive[3]->GetMaterial()->SetColor(Color(0.4f, 0.4f, 0.4f));
 		// light source 2
 		m_Primitive[4] = new Sphere(vector3(2, 5, 1), 0.1f);
 		m_Primitive[4]->Light(true);
-		m_Primitive[4]->GetMaterial()->SetColor(Color(0.7f, 0.7f, 0.9f));
+		m_Primitive[4]->GetMaterial()->SetColor(Color(0.6f, 0.6f, 0.8f));
 		// set number of primitives
 		m_Primitives = 5;
 	}
