@@ -24,5 +24,9 @@ void make_picture_test(pixel* a_picture, int width, int height) {
 }
 
 void make_picture_blank(pixel* a_picture, int width, int height) {
-	pixel* aPicture = new pixel[width * height]{ 0 };
+	for (int row = 0; row < height; row++) {
+		for (int column = 0; column < width; column++) {
+			a_picture[row * width + column] = 0xff999999;
+		}
+	}
 }

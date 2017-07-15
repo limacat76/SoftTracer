@@ -6,6 +6,11 @@ public:
 	virtual void loop(bool &quit, int &frames, bool &allClosed) = 0;
 
 	virtual void stop() = 0;
+
+	void set_auto_continue(bool var);
+
+protected:
+	bool auto_continue = false;
 };
 
 class Headless : public Target {
