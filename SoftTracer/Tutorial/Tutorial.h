@@ -18,7 +18,7 @@ namespace JBikker {
 #define SQRLENGTH(A)	(A.x*A.x+A.y*A.y+A.z*A.z)
 #define SQRDISTANCE(A,B) ((A.x-B.x)*(A.x-B.x)+(A.y-B.y)*(A.y-B.y)+(A.z-B.z)*(A.z-B.z))
 
-#define EPSILON			0.0001f
+#define EPSILON			0.001f
 #define TRACEDEPTH		6
 
 #define PI				3.141592653589793238462f
@@ -116,14 +116,20 @@ namespace JBikker {
 		void SetColor(Color& a_Color) { m_Color = a_Color; }
 		Color GetColor() { return m_Color; }
 		void SetDiffuse(float a_Diff) { m_Diff = a_Diff; }
+		void SetSpecular(float a_Spec) { m_Spec = a_Spec; }
 		void SetReflection(float a_Refl) { m_Refl = a_Refl; }
-		float GetSpecular() { return 1.0f - m_Diff; }
+		void SetRefraction(float a_Refr) { m_Refr = a_Refr; }
+		float GetSpecular() { return m_Spec; }
 		float GetDiffuse() { return m_Diff; }
 		float GetReflection() { return m_Refl; }
+		float GetRefraction() { return m_Refr; }
+		void SetRefrIndex(float a_Refr) { m_RIndex = a_Refr; }
+		float GetRefrIndex() { return m_RIndex; }
 	private:
 		Color m_Color;
-		float m_Refl;
-		float m_Diff;
+		float m_Refl, m_Refr;
+		float m_Diff, m_Spec;
+		float m_RIndex;
 	};
 
 	// -----------------------------------------------------------
@@ -201,6 +207,7 @@ namespace JBikker {
 	public:
 		Scene() : m_Primitives(0), m_Primitive(0) {};
 		~Scene();
+		void SphereTree(int& a_Prim, float a_Radius, vector3 a_Pos, int a_Depth);
 		void InitScene();
 		int GetNrPrimitives() { return m_Primitives; }
 		Primitive* GetPrimitive(int a_Idx) { return m_Primitive[a_Idx]; }

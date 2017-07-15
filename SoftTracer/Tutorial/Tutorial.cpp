@@ -65,16 +65,36 @@ namespace JBikker {
 			// render pixels for current line
 			for (int x = 0; x < m_Width; x++)
 			{
-				// fire primary ray
+				// fire primary rays
 				Color acc(0, 0, 0);
 				vector3 dir = vector3(m_SX, m_SY, 0) - o;
 				NORMALIZE(dir);
 				Ray r(o, dir);
 				float dist;
 				Primitive* prim = Raytrace(r, acc, 1, 1.0f, dist);
-				int red = (int)(acc.r * 256);
-				int green = (int)(acc.g * 256);
-				int blue = (int)(acc.b * 256);
+				int red, green, blue;
+				if (prim != lastprim)
+				{
+					lastprim = prim;
+					Color acc(0, 0, 0);
+					for (int tx = -1; tx < 2; tx++) for (int ty = -1; ty < 2; ty++)
+					{
+						vector3 dir = vector3(m_SX + m_DX * tx / 2.0f, m_SY + m_DY * ty / 2.0f, 0) - o;
+						NORMALIZE(dir);
+						Ray r(o, dir);
+						float dist;
+						Primitive* prim = Raytrace(r, acc, 1, 1.0f, dist);
+					}
+					red = (int)(acc.r * (256 / 9));
+					green = (int)(acc.g * (256 / 9));
+					blue = (int)(acc.b * (256 / 9));
+				}
+				else
+				{
+					red = (int)(acc.r * 256);
+					green = (int)(acc.g * 256);
+					blue = (int)(acc.b * 256);
+				}
 				if (red > 255) red = 255;
 				if (green > 255) green = 255;
 				if (blue > 255) blue = 255;
@@ -126,9 +146,9 @@ namespace JBikker {
 			// determine color at point of intersection
 			pi = a_Ray.GetOrigin() + a_Ray.GetDirection() * a_Dist;
 			// trace lights
-			for (int a_light = 0; a_light < m_Scene->GetNrPrimitives(); a_light++)
+			for (int l = 0; l < m_Scene->GetNrPrimitives(); l++)
 			{
-				Primitive* p = m_Scene->GetPrimitive(a_light);
+				Primitive* p = m_Scene->GetPrimitive(l);
 				if (p->IsLight())
 				{
 					Primitive* light = p;
@@ -150,48 +170,69 @@ namespace JBikker {
 							}
 						}
 					}
-					// calculate diffuse shading
-					vector3 L = ((Sphere*)light)->GetCentre() - pi;
-					NORMALIZE(L);
-					vector3 N = prim->GetNormal(pi);
-					if (prim->GetMaterial()->GetDiffuse() > 0)
+					if (shade > 0)
 					{
-						float dot = DOT(L, N);
-						if (dot > 0)
+						// calculate diffuse shading
+						vector3 L = ((Sphere*)light)->GetCentre() - pi;
+						NORMALIZE(L);
+						vector3 N = prim->GetNormal(pi);
+						if (prim->GetMaterial()->GetDiffuse() > 0)
 						{
-							float diff = dot * prim->GetMaterial()->GetDiffuse() * shade;
-							// add diffuse component to ray color
-							a_Acc += diff * light->GetMaterial()->GetColor() * prim->GetMaterial()->GetColor();
+							float dot = DOT(L, N);
+							if (dot > 0)
+							{
+								float diff = dot * prim->GetMaterial()->GetDiffuse() * shade;
+								// add diffuse component to ray color
+								a_Acc += diff * prim->GetMaterial()->GetColor() * light->GetMaterial()->GetColor();
+							}
 						}
-					}
-					// determine specular component
-					if (prim->GetMaterial()->GetSpecular() > 0)
-					{
-						// point light source: sample once for specular highlight
-						vector3 V = a_Ray.GetDirection();
-						vector3 R = L - 2.0f * DOT(L, N) * N;
-						float dot = DOT(V, R);
-						if (dot > 0)
+						// determine specular component
+						if (prim->GetMaterial()->GetSpecular() > 0)
 						{
-							float spec = powf(dot, 20) * prim->GetMaterial()->GetSpecular() * shade;
-							// add specular component to ray color
-							a_Acc += spec * light->GetMaterial()->GetColor();
+							// point light source: sample once for specular highlight
+							vector3 V = a_Ray.GetDirection();
+							vector3 R = L - 2.0f * DOT(L, N) * N;
+							float dot = DOT(V, R);
+							if (dot > 0)
+							{
+								float spec = powf(dot, 20) * prim->GetMaterial()->GetSpecular() * shade;
+								// add specular component to ray color
+								a_Acc += spec * light->GetMaterial()->GetColor();
+							}
 						}
 					}
 				}
 			}
 			// calculate reflection
 			float refl = prim->GetMaterial()->GetReflection();
-			if (refl > 0.0f)
+			if ((refl > 0.0f) && (a_Depth < TRACEDEPTH))
 			{
 				vector3 N = prim->GetNormal(pi);
 				vector3 R = a_Ray.GetDirection() - 2.0f * DOT(a_Ray.GetDirection(), N) * N;
-				if (a_Depth < TRACEDEPTH)
+				Color rcol(0, 0, 0);
+				float dist;
+				Raytrace(Ray(pi + R * EPSILON, R), rcol, a_Depth + 1, a_RIndex, dist);
+				a_Acc += refl * rcol * prim->GetMaterial()->GetColor();
+			}
+			// calculate refraction
+			float refr = prim->GetMaterial()->GetRefraction();
+			if ((refr > 0) && (a_Depth < TRACEDEPTH))
+			{
+				float rindex = prim->GetMaterial()->GetRefrIndex();
+				float n = a_RIndex / rindex;
+				vector3 N = prim->GetNormal(pi) * (float)result;
+				float cosI = -DOT(N, a_Ray.GetDirection());
+				float cosT2 = 1.0f - n * n * (1.0f - cosI * cosI);
+				if (cosT2 > 0.0f)
 				{
+					vector3 T = (n * a_Ray.GetDirection()) + (n * cosI - sqrtf(cosT2)) * N;
 					Color rcol(0, 0, 0);
 					float dist;
-					Raytrace(Ray(pi + R * EPSILON, R), rcol, a_Depth + 1, a_RIndex, dist);
-					a_Acc += refl * rcol * prim->GetMaterial()->GetColor();
+					Raytrace(Ray(pi + T * EPSILON, T), rcol, a_Depth + 1, rindex, dist);
+					// apply Beer's law
+					Color absorbance = prim->GetMaterial()->GetColor() * 0.15f * -dist;
+					Color transparency = Color(expf(absorbance.r), expf(absorbance.g), expf(absorbance.b));
+					a_Acc += rcol * transparency;
 				}
 			}
 		}
@@ -224,7 +265,7 @@ namespace JBikker {
 
 	Material::Material() :
 		m_Color(Color(0.2f, 0.2f, 0.2f)),
-		m_Refl(0), m_Diff(0.2f)
+		m_Refl(0), m_Diff(0.2f), m_Spec(0.8f), m_RIndex(1.5f)
 	{
 	}
 
@@ -304,22 +345,27 @@ namespace JBikker {
 
 	void Scene::InitScene()
 	{
-		m_Primitive = new Primitive*[100];
+		m_Primitive = new Primitive*[500];
 		// ground plane
 		m_Primitive[0] = new PlanePrim(vector3(0, 1, 0), 4.4f);
 		m_Primitive[0]->SetName("plane");
-		m_Primitive[0]->GetMaterial()->SetReflection(0);
+		m_Primitive[0]->GetMaterial()->SetReflection(0.0f);
+		m_Primitive[0]->GetMaterial()->SetRefraction(0.0f);
 		m_Primitive[0]->GetMaterial()->SetDiffuse(1.0f);
 		m_Primitive[0]->GetMaterial()->SetColor(Color(0.4f, 0.3f, 0.3f));
 		// big sphere
-		m_Primitive[1] = new Sphere(vector3(1, -0.8f, 3), 2.5f);
+		m_Primitive[1] = new Sphere(vector3(2, 0.8f, 3), 2.5f);
 		m_Primitive[1]->SetName("big sphere");
-		m_Primitive[1]->GetMaterial()->SetReflection(0.6f);
-		m_Primitive[1]->GetMaterial()->SetColor(Color(0.7f, 0.7f, 0.7f));
+		m_Primitive[1]->GetMaterial()->SetReflection(0.2f);
+		m_Primitive[1]->GetMaterial()->SetRefraction(0.8f);
+		m_Primitive[1]->GetMaterial()->SetRefrIndex(1.3f);
+		m_Primitive[1]->GetMaterial()->SetColor(Color(0.7f, 0.7f, 1.0f));
 		// small sphere
 		m_Primitive[2] = new Sphere(vector3(-5.5f, -0.5, 7), 2);
 		m_Primitive[2]->SetName("small sphere");
-		m_Primitive[2]->GetMaterial()->SetReflection(1.0f);
+		m_Primitive[2]->GetMaterial()->SetReflection(0.5f);
+		m_Primitive[2]->GetMaterial()->SetRefraction(0.0f);
+		m_Primitive[2]->GetMaterial()->SetRefrIndex(1.3f);
 		m_Primitive[2]->GetMaterial()->SetDiffuse(0.1f);
 		m_Primitive[2]->GetMaterial()->SetColor(Color(0.7f, 0.7f, 1.0f));
 		// light source 1
@@ -327,11 +373,46 @@ namespace JBikker {
 		m_Primitive[3]->Light(true);
 		m_Primitive[3]->GetMaterial()->SetColor(Color(0.4f, 0.4f, 0.4f));
 		// light source 2
-		m_Primitive[4] = new Sphere(vector3(2, 5, 1), 0.1f);
+		m_Primitive[4] = new Sphere(vector3(-3, 5, 1), 0.1f);
 		m_Primitive[4]->Light(true);
 		m_Primitive[4]->GetMaterial()->SetColor(Color(0.6f, 0.6f, 0.8f));
+		// extra sphere
+		m_Primitive[5] = new Sphere(vector3(-1.5f, -3.8f, 1), 1.5f);
+		m_Primitive[5]->SetName("extra sphere");
+		m_Primitive[5]->GetMaterial()->SetReflection(0.0f);
+		m_Primitive[5]->GetMaterial()->SetRefraction(0.8f);
+		m_Primitive[5]->GetMaterial()->SetColor(Color(1.0f, 0.4f, 0.4f));
+		// back plane
+		m_Primitive[6] = new PlanePrim(vector3(0.4f, 0, -1), 12);
+		m_Primitive[6]->SetName("back plane");
+		m_Primitive[6]->GetMaterial()->SetReflection(0.0f);
+		m_Primitive[6]->GetMaterial()->SetRefraction(0.0f);
+		m_Primitive[6]->GetMaterial()->SetSpecular(0);
+		m_Primitive[6]->GetMaterial()->SetDiffuse(0.6f);
+		m_Primitive[6]->GetMaterial()->SetColor(Color(0.5f, 0.3f, 0.5f));
+		// ceiling plane
+		m_Primitive[7] = new PlanePrim(vector3(0, -1, 0), 7.4f);
+		m_Primitive[7]->SetName("back plane");
+		m_Primitive[7]->GetMaterial()->SetReflection(0.0f);
+		m_Primitive[7]->GetMaterial()->SetRefraction(0.0f);
+		m_Primitive[7]->GetMaterial()->SetSpecular(0);
+		m_Primitive[7]->GetMaterial()->SetDiffuse(0.5f);
+		m_Primitive[7]->GetMaterial()->SetColor(Color(0.4f, 0.7f, 0.7f));
+		// grid
+		int prim = 8;
+		for (int x = 0; x < 8; x++) for (int y = 0; y < 7; y++)
+		{
+			m_Primitive[prim] = new Sphere(vector3(-4.5f + x * 1.5f, -4.3f + y * 1.5f, 10), 0.3f);
+			m_Primitive[prim]->SetName("grid sphere");
+			m_Primitive[prim]->GetMaterial()->SetReflection(0);
+			m_Primitive[prim]->GetMaterial()->SetRefraction(0);
+			m_Primitive[prim]->GetMaterial()->SetSpecular(0.6f);
+			m_Primitive[prim]->GetMaterial()->SetDiffuse(0.6f);
+			m_Primitive[prim]->GetMaterial()->SetColor(Color(0.3f, 1.0f, 0.4f));
+			prim++;
+		}
 		// set number of primitives
-		m_Primitives = 5;
+		m_Primitives = prim;
 	}
 
 }; // namespace JBikker
