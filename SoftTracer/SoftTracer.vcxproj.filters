@@ -1,92 +1,107 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="File di origine">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="File di intestazione">
+    <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="File di risorse">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="Header Files\Graphics">
+      <UniqueIdentifier>{95f9bb95-f6ad-4a44-9db5-43b43a460152}</UniqueIdentifier>
     </Filter>
-    <Filter Include="File di origine\Graphics">
+    <Filter Include="Header Files\Interface">
+      <UniqueIdentifier>{77dac554-784f-42e2-ab12-8ce18b3ecc77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tutorial">
+      <UniqueIdentifier>{78e34364-3a5a-4480-a510-a8d28f6c37c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Renderers">
+      <UniqueIdentifier>{84bdd239-67c5-4164-b3a8-55ac20e7e373}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{79347a6e-00b8-4afb-82bb-b95668a4da8f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="File di origine\Interface">
+    <Filter Include="Source Files\Interface">
       <UniqueIdentifier>{d557134f-a5c4-498a-a174-1108842d1527}</UniqueIdentifier>
     </Filter>
-    <Filter Include="File di origine\Tutorial">
+    <Filter Include="Source Files\Tutorial">
       <UniqueIdentifier>{b15c0c02-d122-4dc5-9b6f-53219e891400}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Renderers">
+      <UniqueIdentifier>{9a0092d8-42cc-4445-96dc-4fc1cd43302f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Run.cpp">
-      <Filter>File di origine</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Time.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderers\Raytracer.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderers\Test.cpp">
-      <Filter>File di origine</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\Graphics.cpp">
-      <Filter>File di origine\Graphics</Filter>
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Interface\Mailbox.cpp">
-      <Filter>File di origine\Interface</Filter>
+      <Filter>Source Files\Interface</Filter>
     </ClCompile>
     <ClCompile Include="Interface\Parameters.cpp">
-      <Filter>File di origine\Interface</Filter>
-    </ClCompile>
-    <ClCompile Include="Interface\Target.cpp">
-      <Filter>File di origine</Filter>
+      <Filter>Source Files\Interface</Filter>
     </ClCompile>
     <ClCompile Include="Tutorial\Tutorial.cpp">
-      <Filter>File di origine\Tutorial</Filter>
+      <Filter>Source Files\Tutorial</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\Raytracer.cpp">
+      <Filter>Source Files\Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\Test.cpp">
+      <Filter>Source Files\Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="Interface\Target.cpp">
+      <Filter>Source Files\Interface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="Time.h">
-      <Filter>File di origine</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Renderers\Raytracer.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderers\Test.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\Graphics.h">
-      <Filter>File di origine\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Interface\CallableAlgorithm.h">
-      <Filter>File di origine\Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Interface\Mailbox.h">
-      <Filter>File di origine\Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Interface\Parameters.h">
-      <Filter>File di origine\Interface</Filter>
+      <Filter>Header Files\Renderers</Filter>
     </ClInclude>
     <ClInclude Include="Interface\Target.h">
-      <Filter>File di origine</Filter>
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\Test.h">
+      <Filter>Header Files\Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="Time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface\Parameters.h">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface\Mailbox.h">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface\CallableAlgorithm.h">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Graphics.h">
+      <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Tutorial\Tutorial.h">
-      <Filter>File di origine\Tutorial</Filter>
+      <Filter>Header Files\Tutorial</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SoftTracer.rc">
-      <Filter>File di risorse</Filter>
+      <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
 </Project>
