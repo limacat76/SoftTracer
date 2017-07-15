@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
 	std::time_t start_time = std::chrono::system_clock::to_time_t(start);
 	std::cout << "starting computation at " << limacat::take_my_time();
 
-	const int no_threads = 1;
+	const int no_threads = 8;
 	// Raytracer ta;
 	// Attempt1::JBEngine ta;
 	JBRaytracer::JBEngine ta;

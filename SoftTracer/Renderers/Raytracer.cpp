@@ -70,24 +70,31 @@ namespace JBRaytracer {
 
 		MailBox* my_mailbox = (MailBox *)mailbox;
 		const Parameters* my_parameters = (const Parameters *)parameters;
+		const int total_threads = my_parameters->totalThreads;
 		const int thread_no = my_parameters->threadNumber;
 		const int m_Width = my_parameters->width;
 		const int m_Height = my_parameters->height;
 		
-		float m_WX1, m_WY1, m_WX2, m_WY2, m_DX, m_DY, m_SX, m_SY;
-		// set firts line to draw to
-		int m_CurrLine = 20;
-		// set pixel buffer address of first pixel
-		int m_PPos = 20 * m_Width;
+		float m_WX1, m_WY1, m_WX2, m_WY2, m_DX, m_DY, m_SX;
+
 		// screen plane in world space coordinates
-		m_WX1 = -4, m_WX2 = 4, m_WY1 = m_SY = 3, m_WY2 = -3;
+		m_WX1 = -16/3, m_WX2 = 16 / 3, m_WY1 = 9 / 3, m_WY2 = -9 / 3;
 		// calculate deltas for interpolation
 		m_DX = (m_WX2 - m_WX1) / m_Width;
 		m_DY = (m_WY2 - m_WY1) / m_Height;
-		m_SY += 20 * m_DY;
+
 		// allocate space to store pointers to primitives for previous line
 		// m_LastRow = new Primitive*[m_Width];
 		// memset(m_LastRow, 0, m_Width * 4);
+
+
+		// set firts line to draw to
+		int m_CurrLine = (m_Height / total_threads * thread_no); // 0;
+		// set pixel buffer address of first pixel
+		int m_PPos = m_CurrLine * m_Width;
+		int band_height = (m_Height / total_threads) + m_CurrLine; // 0;
+		float m_SY = m_WY1 + (m_DY * m_CurrLine);
+
 
 		my_mailbox->work_started(thread_no);
 
@@ -97,7 +104,7 @@ namespace JBRaytracer {
 		Primitive* lastprim = 0;
 		// render remaining lines
 		bool quit = false;
-		for (int y = m_CurrLine; !quit && y < (m_Height - 20); y++)
+		for (int y = m_CurrLine; !quit && y < band_height; y++)
 		{
 			m_SX = m_WX1;
 			// render pixels for current line
