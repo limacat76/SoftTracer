@@ -90,15 +90,18 @@ int main(int argc, char *argv[]) {
 //	const int height = 240;
 
 	pixel* image = new pixel[width * height];
+	bool test_continue = false;
 	// Headless target;
 	SDLTarget target(image, width, height);
-	target.set_auto_continue(true);
+	target.set_auto_continue(test_continue);
 
 	// Raytracer ta;
 	// Attempt1::JBEngine ta;
 	JBikker::Engine engine;
-	run_engine(4, width, height, engine, image, target);
-	run_engine(7, width, height, engine, image, target);
+	if (test_continue) {
+		run_engine(4, width, height, engine, image, target);
+		run_engine(7, width, height, engine, image, target);
+	}
 	run_engine(8, width, height, engine, image, target);
 
 	target.stop();
