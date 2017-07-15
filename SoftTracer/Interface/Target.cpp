@@ -1,5 +1,8 @@
 #include "Target.h"
 
+void Target::set_auto_continue(bool var) {
+	auto_continue = var;
+}
 
 void Headless::loop(bool &quit, int &frames, bool &allClosed) {
 	if (allClosed) {
@@ -39,6 +42,9 @@ void SDLTarget::loop(bool &quit, int &frames, bool &allClosed) {
 	if (!allClosed || remainingFrames > 0) {
 		if (allClosed) {
 			remainingFrames--;
+			if (allClosed && auto_continue) {
+				quit = true;
+			}
 		}
 		while (SDL_PollEvent(&event) != 0) {
 			switch (event.type) {

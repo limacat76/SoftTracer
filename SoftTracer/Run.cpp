@@ -14,38 +14,23 @@
 #include "Tutorial/Tutorial.h"
 #include "Time.h"
 
-std::vector<std::thread> threads;
-
 void printDefines() {
 #ifdef _DEBUG
 	std::cout << "Additional defines go here \n";
 #endif
 }
 
-int main(int argc, char *argv[]) {
-	printDefines();
-
-	const int width = 1920;
-	const int height = 1080;
-//	const int width = 320;
-//	const int height = 240;
-
-	bool quit = false;
-
-	pixel* image = new pixel[width * height];
+void run_engine(const int &no_threads, const int &width, const int &height, JBikker::Engine &engine, pixel *&image, SDLTarget &target) {
 	make_picture_blank(image, width, height);
-	// Headless target;
-	SDLTarget target(image, width, height);
+	std::vector<std::thread> threads;
+
+	engine.initialize_scene(new Parameters(-1, no_threads, width, height));
 
 	std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
 	std::time_t start_time = std::chrono::system_clock::to_time_t(start);
 	std::cout << "starting computation at " << limacat::take_my_time();
 
-	const int no_threads = 8;
-	// Raytracer ta;
-	// Attempt1::JBEngine ta;
-	JBikker::Engine ta;
-	ta.initialize_scene(new Parameters(-1, no_threads, width, height));
+	bool quit = false;
 
 	MailBox* mailbox = new MailBox(no_threads);
 
@@ -53,7 +38,7 @@ int main(int argc, char *argv[]) {
 
 	for (int i = 0; i < no_threads; i++) {
 		parameters[i] = Parameters(i, no_threads, width, height);
-		threads.push_back(std::thread(&CallableAlgorithm::render, &ta, image, mailbox, (const void *)&parameters[i]));
+		threads.push_back(std::thread(&CallableAlgorithm::render, &engine, image, mailbox, (const void *)&parameters[i]));
 	}
 
 	int frames = 0;
@@ -91,13 +76,34 @@ int main(int argc, char *argv[]) {
 		std::cout << " finished at " << mailbox->to_main_finish_working_time[i] << "\n";
 	}
 
-	target.stop();
-	delete[] image;
-	std::cin.clear();
 	std::chrono::duration<double> elapsed_seconds = end - start;
 	std::cout << "finished computation at " << limacat::take_my_time() << "elapsed time: " << elapsed_seconds.count() << "s\n";
 	std::cout << "Rendered " << frames << " frames @" << frames / elapsed_seconds.count() << " fps \n";
+}
 
+int main(int argc, char *argv[]) {
+	printDefines();
+
+	const int width = 1920;
+	const int height = 1080;
+//	const int width = 320;
+//	const int height = 240;
+
+	pixel* image = new pixel[width * height];
+	// Headless target;
+	SDLTarget target(image, width, height);
+	target.set_auto_continue(true);
+
+	// Raytracer ta;
+	// Attempt1::JBEngine ta;
+	JBikker::Engine engine;
+	run_engine(4, width, height, engine, image, target);
+	run_engine(7, width, height, engine, image, target);
+	run_engine(8, width, height, engine, image, target);
+
+	target.stop();
+	delete[] image;
+	std::cin.clear();
 	std::cout << "Press any key to exit \n";
 #pragma warning( push ) 
 #pragma warning( disable : 6031) 
@@ -106,3 +112,4 @@ int main(int argc, char *argv[]) {
 
 	return 0;
 }
+
