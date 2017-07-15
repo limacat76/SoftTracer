@@ -78,13 +78,13 @@
     <LibraryPath>C:\SDL\SDL2-devel-2.0.5-VC\SDL2-2.0.5\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\SDL\eigen-3.3.4;C:\SDL\SDL2-devel-2.0.5-VC\SDL2-2.0.5\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>C:\SDL\SDL2-devel-2.0.5-VC\SDL2-2.0.5\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>C:\SDL\SDL2-devel-2.0.5-VC\SDL2-2.0.5\lib\x64;$(LibraryPath)</LibraryPath>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\SDL\eigen-3.3.4;C:\SDL\SDL2-devel-2.0.5-VC\SDL2-2.0.5\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>C:\SDL\SDL2-devel-2.0.5-VC\SDL2-2.0.5\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>C:\SDL\SDL2-devel-2.0.5-VC\SDL2-2.0.5\lib\x64;$(LibraryPath)</LibraryPath>
     <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
@@ -160,6 +160,7 @@
     <ClCompile Include="Renderers\Test.cpp" />
     <ClCompile Include="Run.cpp" />
     <ClCompile Include="Time.cpp" />
+    <ClCompile Include="Tutorial\Tutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graphics\Graphics.h" />
@@ -171,6 +172,7 @@
     <ClInclude Include="Renderers\Test.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Time.h" />
+    <ClInclude Include="Tutorial\Tutorial.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SoftTracer.rc" />

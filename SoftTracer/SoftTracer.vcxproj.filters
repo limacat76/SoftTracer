@@ -19,6 +19,9 @@
     <Filter Include="File di origine\Interface">
       <UniqueIdentifier>{d557134f-a5c4-498a-a174-1108842d1527}</UniqueIdentifier>
     </Filter>
+    <Filter Include="File di origine\Tutorial">
+      <UniqueIdentifier>{b15c0c02-d122-4dc5-9b6f-53219e891400}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Run.cpp">
@@ -44,6 +47,9 @@
     </ClCompile>
     <ClCompile Include="Interface\Target.cpp">
       <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Tutorial\Tutorial.cpp">
+      <Filter>File di origine\Tutorial</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -73,6 +79,9 @@
     </ClInclude>
     <ClInclude Include="Interface\Target.h">
       <Filter>File di origine</Filter>
+    </ClInclude>
+    <ClInclude Include="Tutorial\Tutorial.h">
+      <Filter>File di origine\Tutorial</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

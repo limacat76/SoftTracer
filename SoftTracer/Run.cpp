@@ -4,21 +4,21 @@
 #include <vector>
 #include <thread>
 #include <conio.h>
+#include "Graphics/Graphics.h"
 #include "Interface/CallableAlgorithm.h"
 #include "Interface/Mailbox.h"
 #include "Interface/Parameters.h"
-#include "Graphics/Graphics.h"
+#include "Interface/Target.h"
 #include "Renderers/Test.h"
 #include "Renderers/Raytracer.h"
-#include "Interface/Mailbox.h"
-#include "Interface/Target.h"
+#include "Tutorial/Tutorial.h"
 #include "Time.h"
 
 std::vector<std::thread> threads;
 
 void printDefines() {
-#ifdef EIGEN_MPL2_ONLY
-	std::cout << "compiled with EIGEN_MPL2_ONLY" << "\n";
+#ifdef _DEBUG
+	std::cout << "Additional defines go here \n";
 #endif
 }
 
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
 	const int no_threads = 8;
 	// Raytracer ta;
 	// Attempt1::JBEngine ta;
-	JBRaytracer::JBEngine ta;
+	JBikker::Engine ta;
 	ta.initialize_scene(new Parameters(-1, no_threads, width, height));
 
 	MailBox* mailbox = new MailBox(no_threads);

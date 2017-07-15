@@ -1,5 +1,4 @@
 #pragma once
-#include <Eigen/Eigen>
 #include <string>
 #include <stdint.h>
 
