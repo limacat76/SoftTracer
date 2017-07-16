@@ -23,11 +23,11 @@ void printDefines() {
 void run_engine(const int &no_threads, const int &width, const int &height, WorkEngine &engine, pixel *&image, Target &target, const bool &log_threads, const bool &log_total) {
 	make_picture_blank(image, width, height);
 	
-	std::vector<std::thread> threads(8);
-	std::vector<bool> allocated(8);
+	std::vector<std::thread> threads(no_threads);
+	std::vector<bool> allocated(no_threads);
 
-	const int block_width = 8;
-	const int block_height = 8;
+	const int block_width = 64;
+	const int block_height = 64;
 
 	engine.initialize_scene(new Parameters(-1, no_threads, width, height, 0, block_width, 0, block_height));
 
@@ -51,21 +51,41 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 	int allocated_height = 0;
 	int allocated_threads = 0;
 
+	int real_block_width = 0;
+	int real_block_height = 0;
 
 	while (has_work || !quit) {
 
 		if (has_work && allocated_threads < no_threads) {
-			for (int i = 0; i < no_threads; i++) {
+			for (int i = allocated_threads; i < no_threads; i++) {
 				if (allocated[i] == false) {
 					mailbox->to_main_finished_working[i] = false;
-					parameters[i] = Parameters(i, no_threads, width, height, 0, block_width, 0, block_height);
+
+					real_block_width = block_width;
+					if (allocated_width + real_block_width > width) {
+						real_block_width = width - allocated_width;
+					}
+
+					real_block_height = block_height;
+					if (allocated_height + real_block_height > height) {
+						real_block_height = height - allocated_height;
+					}
+
+					parameters[i] = Parameters(i, no_threads, width, height, allocated_width, real_block_width, allocated_height, real_block_height);
 					threads[i] = (std::thread(&WorkEngine::render, &engine, image, mailbox, (const void *)&parameters[i]));
 					allocated[i] = true;
 					allocated_threads++;
+					allocated_width = allocated_width + block_width;
+					if (allocated_width > width) {
+						allocated_width = 0;
+						allocated_height = allocated_height + block_height;
+						if (allocated_height > height) {
+							has_work = false;
+						}
+					}
 				}
 			}
 		}
-		has_work = false;
 
 		target.loop(quit, frames, allClosed);
 		if (!allClosed) {
@@ -122,21 +142,21 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 int main(int argc, char *argv[]) {
 	printDefines();
 
-	const int width = 1920;
-	const int height = 1080;
-//	const int width = 320;
-//	const int height = 240;
+//	const int width = 1920;
+// const int height = 1080;
+	const int width = 640;
+	const int height = 480;
 
 	pixel* image = new pixel[width * height];
-	bool test_continue = true;
+	bool test_continue = false;
 	// Headless target;
 	SDLTarget target(image, width, height);
 	target.set_auto_continue(test_continue);
 
 	// Raytracer ta;
 	// Attempt1::JBEngine ta;
-	JBikker::Engine engine;
-	// Test engine;
+	// JBikker::Engine engine;
+	Test engine;
 	if (test_continue) {
 		for (int ii = 0; ii < 10; ii++) {
 			run_engine(8, width, height, engine, image, target, false, true);
