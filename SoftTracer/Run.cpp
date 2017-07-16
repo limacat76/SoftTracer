@@ -20,7 +20,7 @@ void printDefines() {
 #endif
 }
 
-void run_engine(const int &no_threads, const int &width, const int &height, WorkEngine &engine, pixel *&image, Target &target) {
+void run_engine(const int &no_threads, const int &width, const int &height, WorkEngine &engine, pixel *&image, Target &target, const bool &log_threads, const bool &log_total) {
 	make_picture_blank(image, width, height);
 	
 	std::vector<std::thread> threads(8);
@@ -33,7 +33,9 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 
 	std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
 	std::time_t start_time = std::chrono::system_clock::to_time_t(start);
-	std::cout << "starting computation at " << limacat::take_my_time();
+	if (log_total) {
+		std::cout << "starting computation at " << limacat::take_my_time();
+	}
 
 	int frames = 0;
 	const int hz = 1000 / 24;
@@ -81,7 +83,9 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 			}
 			if (found && (!has_work)) {
 				allClosed = true;
-				std::cout << "Threads stopped running, switching to blocking mode" << "\n";
+				if (log_threads) {
+					std::cout << "Threads stopped running, switching to blocking mode" << "\n";
+				}
 				end = std::chrono::system_clock::now();
 			}
 		}
@@ -101,14 +105,18 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 		}
 	}
 
-	for (int i = 0; i < no_threads; i++) {
-		std::cout << "Thread " << i << " started at " << mailbox->to_main_start_working_time[i];
-		std::cout << " finished at " << mailbox->to_main_finish_working_time[i] << "\n";
+	if (log_threads) {
+		for (int i = 0; i < no_threads; i++) {
+			std::cout << "Thread " << i << " started at " << mailbox->to_main_start_working_time[i];
+			std::cout << " finished at " << mailbox->to_main_finish_working_time[i] << "\n";
+		}
 	}
 
-	std::chrono::duration<double> elapsed_seconds = end - start;
-	std::cout << "finished computation at " << limacat::take_my_time() << "elapsed time: " << elapsed_seconds.count() << "s\n";
-	std::cout << "Rendered " << frames << " frames @" << frames / elapsed_seconds.count() << " fps \n";
+	if (log_total) {
+		std::chrono::duration<double> elapsed_seconds = end - start;
+		std::cout << "finished computation at " << limacat::take_my_time() << "elapsed time: " << elapsed_seconds.count() << "s\n";
+		std::cout << "Rendered " << frames << " frames @" << frames / elapsed_seconds.count() << " fps \n";
+	}
 }
 
 int main(int argc, char *argv[]) {
@@ -131,10 +139,10 @@ int main(int argc, char *argv[]) {
 	// Test engine;
 	if (test_continue) {
 		for (int ii = 0; ii < 10; ii++) {
-			run_engine(8, width, height, engine, image, target);
+			run_engine(8, width, height, engine, image, target, false, true);
 		}
 	} else {
-		run_engine(8, width, height, engine, image, target);
+		run_engine(8, width, height, engine, image, target, true, true);
 	}
 
 	target.stop();
