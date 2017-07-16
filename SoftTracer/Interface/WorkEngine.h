@@ -1,10 +1,10 @@
 #pragma once
-class CallableAlgorithm {
+class WorkEngine {
 public:
-	CallableAlgorithm() {
+	WorkEngine() {
 	}
 
-	virtual ~CallableAlgorithm() {
+	virtual ~WorkEngine() {
 	}
 
 	virtual void initialize_scene(const void* parameters) = 0;

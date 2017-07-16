@@ -89,14 +89,14 @@
     <ClInclude Include="Interface\Mailbox.h">
       <Filter>Header Files\Interface</Filter>
     </ClInclude>
-    <ClInclude Include="Interface\CallableAlgorithm.h">
-      <Filter>Header Files\Interface</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\Graphics.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Tutorial\Tutorial.h">
       <Filter>Header Files\Tutorial</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface\WorkEngine.h">
+      <Filter>Header Files\Interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

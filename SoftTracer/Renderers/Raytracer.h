@@ -1,7 +1,7 @@
 #pragma once
-#include "../Interface/CallableAlgorithm.h"
+#include "../Interface/WorkEngine.h"
 
-class Raytracer : public CallableAlgorithm {
+class Raytracer : public WorkEngine {
 private:
 
 public:

@@ -164,7 +164,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graphics\Graphics.h" />
-    <ClInclude Include="Interface\CallableAlgorithm.h" />
+    <ClInclude Include="Interface\WorkEngine.h" />
     <ClInclude Include="Interface\Mailbox.h" />
     <ClInclude Include="Interface\Target.h" />
     <ClInclude Include="Interface\Parameters.h" />

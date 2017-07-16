@@ -5,10 +5,10 @@
 #include <thread>
 #include <conio.h>
 #include "Graphics/Graphics.h"
-#include "Interface/CallableAlgorithm.h"
 #include "Interface/Mailbox.h"
 #include "Interface/Parameters.h"
 #include "Interface/Target.h"
+#include "Interface/WorkEngine.h"
 #include "Renderers/Test.h"
 #include "Renderers/Raytracer.h"
 #include "Tutorial/Tutorial.h"
@@ -20,40 +20,64 @@ void printDefines() {
 #endif
 }
 
-void run_engine(const int &no_threads, const int &width, const int &height, JBikker::Engine &engine, pixel *&image, SDLTarget &target) {
+void run_engine(const int &no_threads, const int &width, const int &height, WorkEngine &engine, pixel *&image, SDLTarget &target) {
 	make_picture_blank(image, width, height);
-	std::vector<std::thread> threads;
+	
+	std::vector<std::thread> threads(8);
+	std::vector<bool> allocated(8);
 
-	engine.initialize_scene(new Parameters(-1, no_threads, width, height));
+	engine.initialize_scene(new Parameters(-1, no_threads, width, height, 0, width, 0, height));
 
 	std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
 	std::time_t start_time = std::chrono::system_clock::to_time_t(start);
 	std::cout << "starting computation at " << limacat::take_my_time();
-
-	bool quit = false;
-
-	MailBox* mailbox = new MailBox(no_threads);
-
-	Parameters* parameters = new Parameters[no_threads];
-
-	for (int i = 0; i < no_threads; i++) {
-		parameters[i] = Parameters(i, no_threads, width, height);
-		threads.push_back(std::thread(&CallableAlgorithm::render, &engine, image, mailbox, (const void *)&parameters[i]));
-	}
 
 	int frames = 0;
 	const int hz = 1000 / 24;
 	bool allClosed = false;
 	std::chrono::time_point<std::chrono::system_clock> end;
 
-	while (!quit) {
+	MailBox* mailbox = new MailBox(no_threads);
+	Parameters* parameters = new Parameters[no_threads];
+
+	bool quit = false;
+	bool has_work = true;
+	int allocated_width = 0;
+	int allocated_height = 0;
+	int allocated_threads = 0;
+	const int block_width = 8;
+	const int block_height = 8;
+
+	while (has_work || !quit) {
+
+		if (has_work && allocated_threads < no_threads) {
+			for (int i = 0; i < no_threads; i++) {
+				if (allocated[i] == false) {
+					mailbox->to_main_finished_working[i] = false;
+					parameters[i] = Parameters(i, no_threads, width, height, 0, width, 0, height);
+					threads[i] = (std::thread(&WorkEngine::render, &engine, image, mailbox, (const void *)&parameters[i]));
+					allocated[i] = true;
+					allocated_threads++;
+				}
+			}
+		}
+		has_work = false;
+
 		target.loop(quit, frames, allClosed);
 		if (!allClosed) {
+			for (int i = 0; i < no_threads; i++) {
+				bool has_finished = mailbox->to_main_finished_working[i];
+				if (has_finished && allocated[i]) {
+					threads[i].join();
+					allocated[i] = false;
+					allocated_threads--;
+				}
+			}
 			bool found = true;
 			for (int i = 0; found && i < no_threads; i++) {
 				found = mailbox->to_main_finished_working[i];
 			}
-			if (found) {
+			if (found && (!has_work)) {
 				allClosed = true;
 				std::cout << "Threads stopped running, switching to blocking mode" << "\n";
 				end = std::chrono::system_clock::now();
@@ -66,9 +90,13 @@ void run_engine(const int &no_threads, const int &width, const int &height, JBik
 	if (!allClosed) {
 		std::cout << "Closed before" << "\n";
 		end = std::chrono::system_clock::now();
-	}
-	for (int i = 0; i < no_threads; i++) {
-		threads[i].join();
+		for (int i = 0; i < no_threads; i++) {
+			if (allocated[i]) {
+				threads[i].join();
+				allocated[i] = false;
+				allocated_threads--;
+			}
+		}
 	}
 
 	for (int i = 0; i < no_threads; i++) {
@@ -98,6 +126,7 @@ int main(int argc, char *argv[]) {
 	// Raytracer ta;
 	// Attempt1::JBEngine ta;
 	JBikker::Engine engine;
+	// Test engine;
 	if (test_continue) {
 		run_engine(4, width, height, engine, image, target);
 		run_engine(7, width, height, engine, image, target);

@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdlib>
 #include <string>
-#include "../Interface/CallableAlgorithm.h"
+#include "../Interface/WorkEngine.h"
 
 namespace JBikker {
 // ------------------------
@@ -216,7 +216,7 @@ namespace JBikker {
 		Primitive** m_Primitive;
 	};
 
-	class Engine : public CallableAlgorithm {
+	class Engine : public WorkEngine {
 	private:
 		Scene* m_Scene;
 

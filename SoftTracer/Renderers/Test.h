@@ -1,7 +1,7 @@
 #pragma once
-#include "../Interface/CallableAlgorithm.h"
+#include "../Interface/WorkEngine.h"
 
-class Test : public CallableAlgorithm {
+class Test : public WorkEngine {
 private:
 
 public:
@@ -16,7 +16,7 @@ public:
 	void render(void* target, void* mailbox, const void* parameters);
 };
 
-class Bands : public CallableAlgorithm {
+class Bands : public WorkEngine {
 private:
 
 public:
@@ -31,7 +31,7 @@ public:
 	void render(void* target, void* mailbox, const void* parameters);
 };
 
-class Noise : public CallableAlgorithm {
+class Noise : public WorkEngine {
 private:
 
 public:
