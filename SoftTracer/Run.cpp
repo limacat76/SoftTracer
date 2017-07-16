@@ -142,10 +142,10 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 int main(int argc, char *argv[]) {
 	printDefines();
 
-//	const int width = 1920;
-// const int height = 1080;
-	const int width = 640;
-	const int height = 480;
+	const int width = 1920;
+	const int height = 1080;
+	//const int width = 640;
+	//const int height = 480;
 
 	pixel* image = new pixel[width * height];
 	bool test_continue = false;
@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
 	// Raytracer ta;
 	// Attempt1::JBEngine ta;
 	// JBikker::Engine engine;
-	Bands engine;
+	Noise engine;
 	if (test_continue) {
 		for (int ii = 0; ii < 10; ii++) {
 			run_engine(8, width, height, engine, image, target, false, true);
