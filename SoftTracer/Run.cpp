@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
 	// Raytracer ta;
 	// Attempt1::JBEngine ta;
 	// JBikker::Engine engine;
-	Test engine;
+	Bands engine;
 	if (test_continue) {
 		for (int ii = 0; ii < 10; ii++) {
 			run_engine(8, width, height, engine, image, target, false, true);

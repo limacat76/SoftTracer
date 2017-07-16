@@ -16,7 +16,6 @@ void Test::render(void* target, void* mailbox, const void* parameters) {
 
 	const int thread_no = myParameters->threadNumber;
 	const int total_threads = myParameters->totalThreads;
-	const int aSection = myParameters->height / total_threads;
 
 	const int startX = myParameters->start_x;
 	int endX = startX + myParameters->width_x;
@@ -58,27 +57,35 @@ void Bands::render(void* target, void* mailbox, const void* parameters) {
 
 	const int thread_no = myParameters->threadNumber;
 	const int total_threads = myParameters->totalThreads;
-	const int aSection = myParameters->height / total_threads;
-	const int startY = thread_no * aSection;
-	const int endY = thread_no == total_threads - 1 ? myParameters->height : thread_no * aSection + aSection;
+
+	const int startX = myParameters->start_x;
+	int endX = startX + myParameters->width_x;
+
+	const int startY = myParameters->start_y; // thread_no * aSection;
+	int endY = startY + myParameters->height_y;   // thread_no == total_threads - 1 ? myParameters->height : thread_no * aSection + aSection;
 
 	my_mailbox->work_started(thread_no);
-	pixel* current_pixel = image + (startY * myParameters->width);
+	pixel* start_pixel = image + startX + (startY * myParameters->width);
 
-	const pixel luminosity = thread_no == total_threads - 1 ? 255 : (255 / total_threads) * thread_no;
+	const float luminosity = 255.0 / myParameters->height;
 
 	// Trace rays
 	bool quit = false;
 	for (int y = startY; !quit && y < endY; ++y) {
-		for (int x = 0; !quit && x < myParameters->width; ++x, ++current_pixel) {
+		pixel* current_pixel = start_pixel;
+
+		int my_luminosity = (int)(luminosity * y);
+
+		for (int x = startX; !quit && x < endX; ++x, ++current_pixel) {
 			pixel anUint = 255 << 8;
-			anUint = (anUint + luminosity) << 8;
-			anUint = (anUint + luminosity) << 8;
-			anUint = (anUint + luminosity);
+			anUint = (anUint + my_luminosity) << 8;
+			anUint = (anUint + my_luminosity) << 8;
+			anUint = (anUint + my_luminosity);
 
 			*current_pixel = anUint;
 			quit = my_mailbox->to_children_quit;
 		}
+		start_pixel = start_pixel + myParameters->width;
 	}
 
 	my_mailbox->work_done(thread_no);
