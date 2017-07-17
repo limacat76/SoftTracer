@@ -23,3 +23,19 @@ public:
 	int height_y;
 
 };
+
+class WorkUnit {
+public:
+	WorkUnit();
+
+	WorkUnit(int allocated_width, int allocated_height, int real_block_width, int real_block_height);
+
+	int allocated_width;
+
+	int allocated_height;
+
+	int real_block_width;
+
+	int real_block_height;
+
+};

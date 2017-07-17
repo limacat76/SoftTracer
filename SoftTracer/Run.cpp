@@ -26,8 +26,8 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 	std::vector<std::thread> threads(no_threads);
 	std::vector<bool> allocated(no_threads);
 
-	const int block_width = 64;
-	const int block_height = 64;
+	const int block_width = 128;
+	const int block_height = 128;
 
 	engine.initialize_scene(new Parameters(-1, no_threads, width, height, 0, block_width, 0, block_height));
 
@@ -47,41 +47,59 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 
 	bool quit = false;
 	bool has_work = true;
-	int allocated_width = 0;
-	int allocated_height = 0;
+	bool must_subdivide = true;
+	std::vector<WorkUnit *> workUnits;
+	int currentWorkUnit = 0;
 	int allocated_threads = 0;
 
-	int real_block_width = 0;
-	int real_block_height = 0;
+	int allocated_width = 0;
+	int allocated_height = 0;
+
+	while (must_subdivide) {
+		WorkUnit* aWorkUnit = new WorkUnit();
+		aWorkUnit->real_block_width = block_width;
+		if (allocated_width + aWorkUnit->real_block_width > width) {
+			aWorkUnit->real_block_width = width - allocated_width;
+		}
+
+		aWorkUnit->real_block_height = block_height;
+		if (allocated_height + aWorkUnit->real_block_height > height) {
+			aWorkUnit->real_block_height = height - allocated_height;
+		}
+
+		aWorkUnit->allocated_width = allocated_width;
+		aWorkUnit->allocated_height = allocated_height;
+
+		workUnits.push_back(aWorkUnit);
+
+		allocated_width = allocated_width + block_width;
+		if (allocated_width > width) {
+			allocated_width = 0;
+			allocated_height = allocated_height + block_height;
+			if (allocated_height > height) {
+				must_subdivide = false;
+			}
+		}
+	}
 
 	while (has_work || !quit) {
 
-		if (has_work && allocated_threads < no_threads) {
+		if (has_work && !quit && allocated_threads < no_threads) {
 			for (int i = allocated_threads; i < no_threads; i++) {
-				if (allocated[i] == false) {
+				if (allocated[i] == false && has_work) {
 					mailbox->to_main_finished_working[i] = false;
 
-					real_block_width = block_width;
-					if (allocated_width + real_block_width > width) {
-						real_block_width = width - allocated_width;
-					}
+					WorkUnit* aWorkUnit = workUnits.back();
+					workUnits.pop_back();
 
-					real_block_height = block_height;
-					if (allocated_height + real_block_height > height) {
-						real_block_height = height - allocated_height;
-					}
-
-					parameters[i] = Parameters(i, no_threads, width, height, allocated_width, real_block_width, allocated_height, real_block_height);
+					parameters[i] = Parameters(i, no_threads, width, height, aWorkUnit->allocated_width, aWorkUnit->real_block_width, aWorkUnit->allocated_height, aWorkUnit->real_block_height);
 					threads[i] = (std::thread(&WorkEngine::render, &engine, image, mailbox, (const void *)&parameters[i]));
 					allocated[i] = true;
 					allocated_threads++;
-					allocated_width = allocated_width + block_width;
-					if (allocated_width > width) {
-						allocated_width = 0;
-						allocated_height = allocated_height + block_height;
-						if (allocated_height > height) {
-							has_work = false;
-						}
+					delete aWorkUnit;
+					
+					if (workUnits.size() == 0) {
+						has_work = false;
 					}
 				}
 			}
@@ -156,7 +174,7 @@ int main(int argc, char *argv[]) {
 	// Raytracer ta;
 	// Attempt1::JBEngine ta;
 	// JBikker::Engine engine;
-	Noise engine;
+	Raytracer engine;
 	if (test_continue) {
 		for (int ii = 0; ii < 10; ii++) {
 			run_engine(8, width, height, engine, image, target, false, true);
