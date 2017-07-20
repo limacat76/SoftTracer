@@ -19,24 +19,51 @@ Raytracer::~Raytracer() {
 }
 
 void Raytracer::initialize_scene(const void* parameters) {
-	// Bands does not need to initialize a scene...
+
 }
 
-void Raytracer::render(void* target, void* mailbox, const void* parameters) {
-	pixel* image = (pixel*)target;
+void Raytracer::job(void* target, void* mailbox, const void* parameters) {
+	
 	MailBox* my_mailbox = (MailBox *)mailbox;
 	const Parameters* myParameters = (const Parameters *)parameters;
 
+	WorkUnit * aValue = nullptr;
 	const int thread_no = myParameters->threadNumber;
-	const int total_threads = myParameters->totalThreads;
-
-	const int startX = myParameters->start_x;
-	int endX = startX + myParameters->width_x;
-
-	const int startY = myParameters->start_y; // thread_no * aSection;
-	int endY = startY + myParameters->height_y;   // thread_no == total_threads - 1 ? myParameters->height : thread_no * aSection + aSection;
-
 	my_mailbox->work_started(thread_no);
+	while (!my_mailbox->to_children_quit && !(my_mailbox->to_children_no_more_work && my_mailbox->work_queue.size() == 0)) {
+		{
+			std::lock_guard<std::mutex> lock(my_mailbox->work_mutex);
+			if (my_mailbox->work_queue.size() > 0) {
+				aValue = my_mailbox->work_queue.front();
+				my_mailbox->work_queue.pop_front();
+			}
+			else {
+				//				std::cout << "No job in queue!!\n";
+			}
+		}
+		// Release ownership of the mutex object 
+		//			std::cout << "Releasing Lock!\n";
+
+		if (aValue != nullptr) {
+			render(target, aValue, myParameters, my_mailbox);
+			aValue = nullptr;
+		}
+
+		//			std::cout << "Going to sleep!\n";
+		std::this_thread::yield();
+	}
+	my_mailbox->work_done(thread_no);
+}
+
+void Raytracer::render(void* target, WorkUnit* workUnit, const Parameters* myParameters, MailBox* my_mailbox) {
+	pixel* image = (pixel*)target;
+	const int startX = workUnit->allocated_width;
+	int endX = startX + workUnit->real_block_width;
+
+	const int startY = workUnit->allocated_height; // thread_no * aSection;
+	int endY = startY + workUnit->real_block_height;   // thread_no == total_threads - 1 ? myParameters->height : thread_no * aSection + aSection;
+
+	
 	pixel* start_pixel = image + startX + (startY * myParameters->width);
 
 	// Trace rays
@@ -51,5 +78,5 @@ void Raytracer::render(void* target, void* mailbox, const void* parameters) {
 		start_pixel = start_pixel + myParameters->width;
 	}
 
-	my_mailbox->work_done(thread_no);
+
 }

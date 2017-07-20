@@ -20,14 +20,14 @@ void printDefines() {
 #endif
 }
 
-void run_engine(const int &no_threads, const int &width, const int &height, WorkEngine &engine, pixel *&image, Target &target, const bool &log_threads, const bool &log_total) {
+void run_engine(const int &no_threads, const int &width, const int &height, WorkEngine2 &engine, pixel *&image, Target &target, const bool &log_threads, const bool &log_total) {
 	make_picture_blank(image, width, height);
 	
 	std::vector<std::thread> threads(no_threads);
 	std::vector<bool> allocated(no_threads);
 
-	const int block_width = 128;
-	const int block_height = 128;
+	const int block_width = 8;
+	const int block_height = 8;
 
 	engine.initialize_scene(new Parameters(-1, no_threads, width, height, 0, block_width, 0, block_height));
 
@@ -48,7 +48,7 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 	bool quit = false;
 	bool has_work = true;
 	bool must_subdivide = true;
-	std::vector<WorkUnit *> workUnits;
+
 	int currentWorkUnit = 0;
 	int allocated_threads = 0;
 
@@ -70,7 +70,7 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 		aWorkUnit->allocated_width = allocated_width;
 		aWorkUnit->allocated_height = allocated_height;
 
-		workUnits.push_back(aWorkUnit);
+		mailbox->work_queue.push_back(aWorkUnit);
 
 		allocated_width = allocated_width + block_width;
 		if (allocated_width > width) {
@@ -82,44 +82,24 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 		}
 	}
 
-	while (has_work || !quit) {
+	mailbox->to_children_no_more_work = true;
 
-		if (has_work && !quit && allocated_threads < no_threads) {
-			for (int i = allocated_threads; i < no_threads; i++) {
-				if (allocated[i] == false && has_work) {
-					mailbox->to_main_finished_working[i] = false;
+	for (int i = 0; i < no_threads; i++) {
+		parameters[i] = Parameters(i, no_threads, width, height, 0, 0, 0, 0);
+		threads[i] = (std::thread(&WorkEngine2::job, &engine, image, mailbox, (const void *)&parameters[i]));
+	}
 
-					WorkUnit* aWorkUnit = workUnits.back();
-					workUnits.pop_back();
-
-					parameters[i] = Parameters(i, no_threads, width, height, aWorkUnit->allocated_width, aWorkUnit->real_block_width, aWorkUnit->allocated_height, aWorkUnit->real_block_height);
-					threads[i] = (std::thread(&WorkEngine::render, &engine, image, mailbox, (const void *)&parameters[i]));
-					allocated[i] = true;
-					allocated_threads++;
-					delete aWorkUnit;
-					
-					if (workUnits.size() == 0) {
-						has_work = false;
-					}
-				}
-			}
-		}
-
+	while(!quit) {
 		target.loop(quit, frames, allClosed);
 		if (!allClosed) {
 			for (int i = 0; i < no_threads; i++) {
 				bool has_finished = mailbox->to_main_finished_working[i];
-				if (has_finished && allocated[i]) {
-					threads[i].join();
-					allocated[i] = false;
-					allocated_threads--;
-				}
 			}
 			bool found = true;
 			for (int i = 0; found && i < no_threads; i++) {
 				found = mailbox->to_main_finished_working[i];
 			}
-			if (found && (!has_work)) {
+			if (found) {
 				allClosed = true;
 				if (log_threads) {
 					std::cout << "Threads stopped running, switching to blocking mode" << "\n";
@@ -131,16 +111,8 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 			mailbox->to_children_quit = true;
 		}
 	}
-	if (!allClosed) {
-		std::cout << "Closed before" << "\n";
-		end = std::chrono::system_clock::now();
-		for (int i = 0; i < no_threads; i++) {
-			if (allocated[i]) {
-				threads[i].join();
-				allocated[i] = false;
-				allocated_threads--;
-			}
-		}
+	for (int i = 0; i < no_threads; i++) {
+		threads[i].join();
 	}
 
 	if (log_threads) {
