@@ -138,15 +138,15 @@ int main(int argc, char *argv[]) {
 	//const int height = 480;
 
 	pixel* image = new pixel[width * height];
-	bool test_continue = false;
+	bool test_continue = true;
 	// Headless target;
 	SDLTarget target(image, width, height);
 	target.set_auto_continue(test_continue);
 
 	// Raytracer ta;
 	// Attempt1::JBEngine ta;
-	// JBikker::Engine engine;
-	Raytracer engine;
+	JBikker::Engine engine;
+	// Raytracer engine;
 	if (test_continue) {
 		for (int ii = 0; ii < 10; ii++) {
 			run_engine(8, width, height, engine, image, target, false, true);

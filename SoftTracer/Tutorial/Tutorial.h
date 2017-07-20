@@ -216,11 +216,13 @@ namespace JBikker {
 		Primitive** m_Primitive;
 	};
 
-	class Engine : public WorkEngine {
+	class Engine : public WorkEngine2 {
 	private:
 		Scene* m_Scene;
 
 		Primitive* Raytrace(Ray& a_Ray, Color& a_Acc, int a_Depth, float a_RIndex, float& a_Dist);
+
+		void render(void* target, WorkUnit* parameters, const Parameters* myParameters, MailBox* my_mailbox);
 	public:
 		Engine();
 
@@ -228,7 +230,7 @@ namespace JBikker {
 
 		void initialize_scene(const void* parameters);
 
-		void render(void* target, void* mailbox, const void* parameters);
+		void job(void* target, void* mailbox, const void* parameters);
 	protected:
 		// renderer data
 	};

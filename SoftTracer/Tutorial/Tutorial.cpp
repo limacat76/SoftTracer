@@ -20,13 +20,43 @@ namespace JBikker {
 		m_Scene->InitScene();
 	}
 
-	void Engine::render(void* target, void* mailbox, const void* parameters) {
-		pixel* m_Dest = (pixel*)target;
+	void Engine::job(void* target, void* mailbox, const void* parameters) {
 
 		MailBox* my_mailbox = (MailBox *)mailbox;
-		const Parameters* my_parameters = (const Parameters *)parameters;
-		const int total_threads = my_parameters->totalThreads;
-		const int thread_no = my_parameters->threadNumber;
+		const Parameters* myParameters = (const Parameters *)parameters;
+
+		WorkUnit * aValue = nullptr;
+		const int thread_no = myParameters->threadNumber;
+		my_mailbox->work_started(thread_no);
+		while (!my_mailbox->to_children_quit && !(my_mailbox->to_children_no_more_work && my_mailbox->work_queue.size() == 0)) {
+			{
+				std::lock_guard<std::mutex> lock(my_mailbox->work_mutex);
+				if (my_mailbox->work_queue.size() > 0) {
+					aValue = my_mailbox->work_queue.front();
+					my_mailbox->work_queue.pop_front();
+				}
+				else {
+					//				std::cout << "No job in queue!!\n";
+				}
+			}
+			// Release ownership of the mutex object 
+			//			std::cout << "Releasing Lock!\n";
+
+			if (aValue != nullptr) {
+				render(target, aValue, myParameters, my_mailbox);
+				aValue = nullptr;
+			}
+
+			//			std::cout << "Going to sleep!\n";
+			std::this_thread::yield();
+		}
+		my_mailbox->work_done(thread_no);
+	}
+
+	void Engine::render(void* target, WorkUnit* wuParameters, const Parameters* myParameters, MailBox* my_mailbox) {
+		pixel* m_Dest = (pixel*)target;
+
+		const Parameters* my_parameters = (const Parameters *)myParameters;
 		const int m_Width = my_parameters->width;
 		const int m_Height = my_parameters->height;
 
@@ -44,14 +74,12 @@ namespace JBikker {
 
 
 		// set firts line to draw to
-		int m_CurrLine = (m_Height / total_threads * thread_no); // 0;
-																 // set pixel buffer address of first pixel
-		int m_PPos = m_CurrLine * m_Width;
-		int band_height = (m_Height / total_threads) + m_CurrLine; // 0;
+		int m_CurrColumn = wuParameters->allocated_width; // 0;
+		int m_CurrLine = wuParameters->allocated_height; // 0;
+		int band_height = wuParameters->real_block_height; // 0;
+		int band_width = wuParameters->real_block_width;
+
 		float m_SY = m_WY1 + (m_DY * m_CurrLine);
-
-
-		my_mailbox->work_started(thread_no);
 
 		// render scene
 		vector3 o(0, 0, -5);
@@ -59,11 +87,14 @@ namespace JBikker {
 		Primitive* lastprim = 0;
 		// render remaining lines
 		bool quit = false;
-		for (int y = m_CurrLine; !quit && y < band_height; y++)
+
+
+		for (int y = 0; !quit && y < band_height; y++)
 		{
-			m_SX = m_WX1;
+			int m_PPos = wuParameters->allocated_width + (wuParameters->allocated_height + y) * m_Width;
+			m_SX = m_WX1 + (m_CurrColumn * m_DX);
 			// render pixels for current line
-			for (int x = 0; x < m_Width; x++)
+			for (int x = 0; x < band_width; x++)
 			{
 				// fire primary rays
 				Color acc(0, 0, 0);
@@ -105,8 +136,6 @@ namespace JBikker {
 			quit = my_mailbox->to_children_quit;
 		}
 		// all done
-
-		my_mailbox->work_done(thread_no);
 	}
 
 	// -----------------------------------------------------------
