@@ -31,28 +31,17 @@ namespace JBikker {
 	}
 
 	void Engine::job(void* target, void* mailbox, const void* parameters) {
-
 		MailBox* my_mailbox = (MailBox *)mailbox;
 		const Parameters* myParameters = (const Parameters *)parameters;
-
-		WorkUnit * aValue = nullptr;
 		const int thread_no = myParameters->threadNumber;
 		my_mailbox->work_started(thread_no);
-		while (!my_mailbox->to_children_quit && !(my_mailbox->to_children_no_more_work && my_mailbox->work_queue.size() == 0)) {
-			{
-				std::lock_guard<std::mutex> lock(my_mailbox->work_mutex);
-				if (my_mailbox->work_queue.size() > 0) {
-					aValue = my_mailbox->work_queue.front();
-					my_mailbox->work_queue.pop_front();
-				}
+		int current_work = 0;
+		while (!my_mailbox->to_children_quit && !(my_mailbox->to_children_no_more_work && my_mailbox->work_queue.size() <= current_work)) {
+			current_work = my_mailbox->current_work++;
+			if (my_mailbox->work_queue.size() > current_work) {
+				WorkUnit * aValue = my_mailbox->work_queue[current_work];
+			    render(target, aValue, myParameters, my_mailbox);
 			}
-
-			if (aValue != nullptr) {
-				render(target, aValue, myParameters, my_mailbox);
-				aValue = nullptr;
-			}
-
-			std::this_thread::yield();
 		}
 		my_mailbox->work_done(thread_no);
 	}

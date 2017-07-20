@@ -26,31 +26,15 @@ void Raytracer::job(void* target, void* mailbox, const void* parameters) {
 	
 	MailBox* my_mailbox = (MailBox *)mailbox;
 	const Parameters* myParameters = (const Parameters *)parameters;
-
-	WorkUnit * aValue = nullptr;
 	const int thread_no = myParameters->threadNumber;
 	my_mailbox->work_started(thread_no);
-	while (!my_mailbox->to_children_quit && !(my_mailbox->to_children_no_more_work && my_mailbox->work_queue.size() == 0)) {
-		{
-			std::lock_guard<std::mutex> lock(my_mailbox->work_mutex);
-			if (my_mailbox->work_queue.size() > 0) {
-				aValue = my_mailbox->work_queue.front();
-				my_mailbox->work_queue.pop_front();
-			}
-			else {
-				//				std::cout << "No job in queue!!\n";
-			}
-		}
-		// Release ownership of the mutex object 
-		//			std::cout << "Releasing Lock!\n";
-
-		if (aValue != nullptr) {
+	int current_work = 0;
+	while (!my_mailbox->to_children_quit && !(my_mailbox->to_children_no_more_work && my_mailbox->work_queue.size() <= current_work)) {
+		current_work = my_mailbox->current_work++;
+		if (my_mailbox->work_queue.size() > current_work) {
+			WorkUnit * aValue = my_mailbox->work_queue[current_work];
 			render(target, aValue, myParameters, my_mailbox);
-			aValue = nullptr;
 		}
-
-		//			std::cout << "Going to sleep!\n";
-		std::this_thread::yield();
 	}
 	my_mailbox->work_done(thread_no);
 }

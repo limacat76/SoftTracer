@@ -1,7 +1,9 @@
 #pragma once
 #include <mutex>
+#include <vector>
 #include <deque>
 #include <thread>
+#include <atomic>
 #include "Parameters.h"
 
 class MailBox {
@@ -18,9 +20,8 @@ public:
 	std::string* to_main_finish_working_time;
 
 	// Parameters
-	std::deque<WorkUnit *> work_queue;
-	std::mutex work_mutex;
-
+	std::vector<WorkUnit *> work_queue;
+	std::atomic<int> current_work;
 
 	// Messages
 	std::deque<std::string> messages;
