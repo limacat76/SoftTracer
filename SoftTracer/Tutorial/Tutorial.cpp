@@ -16,8 +16,18 @@ namespace JBikker {
 		delete m_Scene;
 	}
 
-	void Engine::initialize_scene(const void* parameters) {
+	void Engine::initialize_scene(const void* myParameters) {
 		m_Scene->InitScene();
+
+		const Parameters* my_parameters = (const Parameters *)myParameters;
+		m_Width = my_parameters->width;
+		m_Height = my_parameters->height;
+		// screen plane in world space coordinates
+		m_WX1 = -16 / 3, m_WX2 = 16 / 3, m_WY1 = 9 / 3, m_WY2 = -9 / 3;
+		// calculate deltas for interpolation
+		m_DX = (m_WX2 - m_WX1) / m_Width;
+		m_DY = (m_WY2 - m_WY1) / m_Height;
+
 	}
 
 	void Engine::job(void* target, void* mailbox, const void* parameters) {
@@ -35,43 +45,20 @@ namespace JBikker {
 					aValue = my_mailbox->work_queue.front();
 					my_mailbox->work_queue.pop_front();
 				}
-				else {
-					//				std::cout << "No job in queue!!\n";
-				}
 			}
-			// Release ownership of the mutex object 
-			//			std::cout << "Releasing Lock!\n";
 
 			if (aValue != nullptr) {
 				render(target, aValue, myParameters, my_mailbox);
 				aValue = nullptr;
 			}
 
-			//			std::cout << "Going to sleep!\n";
 			std::this_thread::yield();
 		}
 		my_mailbox->work_done(thread_no);
 	}
 
-	void Engine::render(void* target, WorkUnit* wuParameters, const Parameters* myParameters, MailBox* my_mailbox) {
+	void Engine::render(void* target, WorkUnit* wuParameters, const Parameters* my_parameters, MailBox* my_mailbox) {
 		pixel* m_Dest = (pixel*)target;
-
-		const Parameters* my_parameters = (const Parameters *)myParameters;
-		const int m_Width = my_parameters->width;
-		const int m_Height = my_parameters->height;
-
-		float m_WX1, m_WY1, m_WX2, m_WY2, m_DX, m_DY, m_SX;
-
-		// screen plane in world space coordinates
-		m_WX1 = -16 / 3, m_WX2 = 16 / 3, m_WY1 = 9 / 3, m_WY2 = -9 / 3;
-		// calculate deltas for interpolation
-		m_DX = (m_WX2 - m_WX1) / m_Width;
-		m_DY = (m_WY2 - m_WY1) / m_Height;
-
-		// allocate space to store pointers to primitives for previous line
-		// m_LastRow = new Primitive*[m_Width];
-		// memset(m_LastRow, 0, m_Width * 4);
-
 
 		// set firts line to draw to
 		int m_CurrColumn = wuParameters->allocated_width; // 0;
@@ -88,11 +75,13 @@ namespace JBikker {
 		// render remaining lines
 		bool quit = false;
 
-
+		int m_start = wuParameters->allocated_width + (wuParameters->allocated_height) * m_Width;
+		float m_reset_X = m_WX1 + (m_CurrColumn * m_DX);
 		for (int y = 0; !quit && y < band_height; y++)
 		{
-			int m_PPos = wuParameters->allocated_width + (wuParameters->allocated_height + y) * m_Width;
-			m_SX = m_WX1 + (m_CurrColumn * m_DX);
+			int m_PPos = m_start;
+			m_start += m_Width;
+			float m_SX = m_reset_X;
 			// render pixels for current line
 			for (int x = 0; x < band_width; x++)
 			{

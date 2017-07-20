@@ -223,6 +223,11 @@ namespace JBikker {
 		Primitive* Raytrace(Ray& a_Ray, Color& a_Acc, int a_Depth, float a_RIndex, float& a_Dist);
 
 		void render(void* target, WorkUnit* parameters, const Parameters* myParameters, MailBox* my_mailbox);
+
+		float m_WX1, m_WY1, m_WX2, m_WY2, m_DX, m_DY;
+		int m_Width;
+		int m_Height;
+
 	public:
 		Engine();
 
