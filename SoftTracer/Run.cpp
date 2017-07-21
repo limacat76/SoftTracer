@@ -115,6 +115,14 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 		threads[i].join();
 	}
 
+	while (!mailbox->work_queue.empty())
+	{
+		WorkUnit* aWorkUnit  = mailbox->work_queue.back();
+		delete aWorkUnit;
+		mailbox->work_queue.pop_back();
+	}
+
+
 	if (log_threads) {
 		for (int i = 0; i < no_threads; i++) {
 			std::cout << "Thread " << i << " started at " << mailbox->to_main_start_working_time[i];
