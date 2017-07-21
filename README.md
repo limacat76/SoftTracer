@@ -6,8 +6,8 @@ This is a for-study project.
 Currently SoftTracer:
 - uses SDL 2.0 as a target for displaying a CPU-rendered image and with tweaks to avoid hogging the cpu after the rendering finishes.
 - it also has a headless target for debugging and profiling purposes.
-- uses multi threaded jobs.
-- imports Jakko Bikker's code from his old articles on flipcode (currently the first part, more to follow before an in-depth refactoring).
+- uses multi threaded jobs. Each jobs works on a pixel area before moving on, so slow parts won't hog just one core
+- imports Jakko Bikker's code from his old articles on flipcode (currently the third part, more to follow before an in-depth refactoring).
 
 ## Getting Started
 This project is being developed directly on Windows 10. I am trying to avoid platform dependent code, but since I am using
