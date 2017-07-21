@@ -1,8 +1,8 @@
 #pragma once
 #include "../Interface/WorkEngine.h"
 
-class Raytracer : public WorkEngine2 {
-private:
+class Raytracer : public WorkEngine {
+protected:
 	void render(void* target, WorkUnit* parameters, const Parameters* myParameters, MailBox* my_mailbox);
 
 public:

@@ -216,7 +216,7 @@ namespace JBikker {
 		Primitive** m_Primitive;
 	};
 
-	class Engine : public WorkEngine2 {
+	class Engine : public WorkEngine {
 	private:
 		Scene* m_Scene;
 

@@ -20,7 +20,7 @@ void printDefines() {
 #endif
 }
 
-void run_engine(const int &no_threads, const int &width, const int &height, WorkEngine2 &engine, pixel *&image, Target &target, const bool &log_threads, const bool &log_total) {
+void run_engine(const int &no_threads, const int &width, const int &height, WorkEngine &engine, pixel *&image, Target &target, const bool &log_threads, const bool &log_total) {
 	make_picture_blank(image, width, height);
 	
 	std::vector<std::thread> threads(no_threads);
@@ -86,7 +86,7 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 
 	for (int i = 0; i < no_threads; i++) {
 		parameters[i] = Parameters(i, no_threads, width, height, 0, 0, 0, 0);
-		threads[i] = (std::thread(&WorkEngine2::job, &engine, image, mailbox, (const void *)&parameters[i]));
+		threads[i] = (std::thread(&WorkEngine::job, &engine, image, mailbox, (const void *)&parameters[i]));
 	}
 
 	while(!quit) {
@@ -143,10 +143,10 @@ int main(int argc, char *argv[]) {
 	SDLTarget target(image, width, height);
 	target.set_auto_continue(test_continue);
 
-	// Raytracer ta;
 	// Attempt1::JBEngine ta;
 	JBikker::Engine engine;
 	// Raytracer engine;
+	// Noise engine;
 	if (test_continue) {
 		for (int ii = 0; ii < 10; ii++) {
 			run_engine(8, width, height, engine, image, target, false, true);
