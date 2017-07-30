@@ -166,7 +166,10 @@ int main(int argc, char *argv[]) {
 		("auto-quit", options::value<bool>()->default_value(false)->implicit_value(true), "set auto-quit for profiling")
 		("full-screen", options::value<bool>()->default_value(false)->implicit_value(true), "set full-screen (non headless targets)")
 		("engine", options::value<int>()->default_value(0), "set engine, 0 for JBikker, 1 for Noise")
-	;
+		("no-log-threads", options::value<bool>()->default_value(false)->implicit_value(true), "disable logging for threads (start and end)")
+		("no-log-total", options::value<bool>()->default_value(false)->implicit_value(true), "disable logging for totals (start and end)")
+		("log-continue-modulo", options::value<int>()->default_value(100), "will print a row every X operation in continue mode")
+		;
 
 	options::variables_map vm;
 	options::store(options::parse_command_line(argc, argv, desc), vm);
@@ -191,6 +194,9 @@ int main(int argc, char *argv[]) {
 	bool auto_quit = getParameter<bool>(vm, "auto-quit");
 	bool full_screen = getParameter<bool>(vm, "full-screen");
 	int engine_number = getParameter<int>(vm, "engine");
+	bool log_threads = !getParameter<bool>(vm, "no-log-threads");
+	bool log_total = !getParameter<bool>(vm, "no-log-total");
+	int continue_times_print = getParameter<int>(vm, "log-continue-modulo");
 
 	pixel* image = new pixel[width * height];
 	Target* target;
@@ -216,12 +222,14 @@ int main(int argc, char *argv[]) {
 		break;
 	}
 	
-	if (test_continue) {
-		for (int ii = 0; ii < test_continue_times; ii++) {
-			run_engine(no_threads, width, height, engine, image, target, false, true);
+	if (!test_continue) {
+		test_continue_times = 1;
+	}
+	for (int ii = 1; ii <= test_continue_times; ii++) {
+		run_engine(no_threads, width, height, engine, image, target, log_threads, log_total);
+		if (ii % continue_times_print == 0) {
+			std::cout << "Done " << ii << "jobs\n";
 		}
-	} else {
-		run_engine(no_threads, width, height, engine, image, target, true, true);
 	}
 
 	target->stop();

@@ -72,7 +72,7 @@ void Bands::render(void* target, WorkUnit* workUnit, const Parameters* myParamet
 
 
 	pixel* start_pixel = image + startX + (startY * myParameters->width);
-	const float luminosity = 255.0 / myParameters->height;
+	const float luminosity = 255.0f / myParameters->height;
 	// Trace rays
 	bool quit = false;
 	for (int y = startY; !quit && y < endY; ++y) {
@@ -124,7 +124,7 @@ void Noise::render(void* target, WorkUnit* workUnit, const Parameters* myParamet
 
 
 	pixel* start_pixel = image + startX + (startY * myParameters->width);
-	const float luminosity = 255.0 / myParameters->height;
+	const float luminosity = 255.0f / myParameters->height;
 
 	std::random_device rd;
 	std::mt19937_64 eng(rd());
