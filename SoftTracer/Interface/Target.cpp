@@ -15,10 +15,12 @@ void Headless::stop() {
 }
 
 
-SDLTarget::SDLTarget(uint32_t* in_pixels, int in_width, int in_height) : pixels(in_pixels), width(in_width), height(in_height) {
+SDLTarget::SDLTarget(uint32_t* in_pixels, int in_width, int in_height, bool full_screen) : pixels(in_pixels), width(in_width), height(in_height), full_screen(full_screen) {
 	SDL_Init(SDL_INIT_VIDEO);
 	window = SDL_CreateWindow("Raytracer with an SDL Output", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
-	// SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+	if (full_screen) {
+		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+	}
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, width, height);
 }

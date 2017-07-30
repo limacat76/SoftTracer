@@ -31,9 +31,10 @@ protected:
 	uint32_t* pixels;
 	int width;
 	int height;
+	bool full_screen;
 
 public:
-	SDLTarget(uint32_t* pixels, int width, int height);
+	SDLTarget(uint32_t* pixels, int width, int height, bool full_screen);
 
 	~SDLTarget();
 

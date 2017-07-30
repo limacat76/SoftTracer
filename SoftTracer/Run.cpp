@@ -14,11 +14,11 @@
 #include "Tutorial/Tutorial.h"
 #include "Time.h"
 
-void printDefines() {
 #ifdef _DEBUG
+void printDefines() {
 	std::cout << "Additional defines go here \n";
-#endif
 }
+#endif
 
 void run_engine(const int &no_threads, const int &width, const int &height, WorkEngine &engine, pixel *&image, Target &target, const bool &log_threads, const bool &log_total) {
 	make_picture_blank(image, width, height);
@@ -138,17 +138,24 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 }
 
 int main(int argc, char *argv[]) {
+#ifdef _DEBUG
 	printDefines();
-
+#endif
 	const int width = 1920;
 	const int height = 1080;
 	//const int width = 640;
 	//const int height = 480;
 
+	bool test_continue = false;
+	bool auto_quit = false;
+	int test_continue_times = 10;
+	bool full_screen = false;
+	int no_threads = 8;
+
 	pixel* image = new pixel[width * height];
-	bool test_continue = true;
+
 	// Headless target;
-	SDLTarget target(image, width, height);
+	SDLTarget target(image, width, height, full_screen);
 	target.set_auto_continue(test_continue);
 
 	// Attempt1::JBEngine ta;
@@ -156,21 +163,23 @@ int main(int argc, char *argv[]) {
 	// Raytracer engine;
 	// Noise engine;
 	if (test_continue) {
-		for (int ii = 0; ii < 10; ii++) {
-			run_engine(8, width, height, engine, image, target, false, true);
+		for (int ii = 0; ii < test_continue_times; ii++) {
+			run_engine(no_threads, width, height, engine, image, target, false, true);
 		}
 	} else {
-		run_engine(8, width, height, engine, image, target, true, true);
+		run_engine(no_threads, width, height, engine, image, target, true, true);
 	}
 
 	target.stop();
 	delete[] image;
-	std::cin.clear();
-	std::cout << "Press any key to exit \n";
+	if (!auto_quit) {
+		std::cin.clear();
+		std::cout << "Press any key to exit \n";
 #pragma warning( push ) 
 #pragma warning( disable : 6031) 
-	_getch();
+		_getch();
 #pragma warning( pop ) 
+	}
 
 	return 0;
 }
