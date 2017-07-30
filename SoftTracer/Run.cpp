@@ -4,6 +4,7 @@
 #include <vector>
 #include <thread>
 #include <conio.h>
+#include <boost/program_options.hpp>
 #include "Graphics/Graphics.h"
 #include "Interface/Mailbox.h"
 #include "Interface/Parameters.h"
@@ -14,13 +15,15 @@
 #include "Tutorial/Tutorial.h"
 #include "Time.h"
 
+namespace options = boost::program_options;
+
 #ifdef _DEBUG
 void printDefines() {
 	std::cout << "Additional defines go here \n";
 }
 #endif
 
-void run_engine(const int &no_threads, const int &width, const int &height, WorkEngine &engine, pixel *&image, Target &target, const bool &log_threads, const bool &log_total) {
+void run_engine(const int &no_threads, const int &width, const int &height, WorkEngine *engine, pixel *&image, Target *target, const bool &log_threads, const bool &log_total) {
 	make_picture_blank(image, width, height);
 	
 	std::vector<std::thread> threads(no_threads);
@@ -29,7 +32,7 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 	const int block_width = 8;
 	const int block_height = 8;
 
-	engine.initialize_scene(new Parameters(-1, no_threads, width, height, 0, block_width, 0, block_height));
+	engine->initialize_scene(new Parameters(-1, no_threads, width, height, 0, block_width, 0, block_height));
 
 	std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
 	std::time_t start_time = std::chrono::system_clock::to_time_t(start);
@@ -86,11 +89,11 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 
 	for (int i = 0; i < no_threads; i++) {
 		parameters[i] = Parameters(i, no_threads, width, height, 0, 0, 0, 0);
-		threads[i] = (std::thread(&WorkEngine::job, &engine, image, mailbox, (const void *)&parameters[i]));
+		threads[i] = (std::thread(&WorkEngine::job, engine, image, mailbox, (const void *)&parameters[i]));
 	}
 
 	while(!quit) {
-		target.loop(quit, frames, allClosed);
+		target->loop(quit, frames, allClosed);
 		if (!allClosed) {
 			for (int i = 0; i < no_threads; i++) {
 				bool has_finished = mailbox->to_main_finished_working[i];
@@ -137,31 +140,82 @@ void run_engine(const int &no_threads, const int &width, const int &height, Work
 	}
 }
 
+template <typename T> T getParameter(options::variables_map value_map, std::string parameter_key) {
+	T result = value_map[parameter_key].as<T>();
+#ifdef _DEBUG
+	std::cout << parameter_key << ":=" << result << "\n";
+#endif
+	return result;
+}
+
 int main(int argc, char *argv[]) {
 #ifdef _DEBUG
 	printDefines();
 #endif
-	const int width = 1920;
-	const int height = 1080;
-	//const int width = 640;
-	//const int height = 480;
 
-	bool test_continue = false;
-	bool auto_quit = false;
-	int test_continue_times = 10;
-	bool full_screen = false;
-	int no_threads = 8;
+	// Declare the supported options.
+	options::options_description desc("Allowed options");
+	desc.add_options()
+		("help", "produce help message")
+		("width", options::value<int>()->default_value(1920), "set screen width")
+		("height", options::value<int>()->default_value(1080), "set screen height")
+		("continue", options::value<bool>()->default_value(false)->implicit_value(true), "set continue")
+		("continue-times", options::value<int>()->default_value(10), "set number of times test have to run for --continue")		
+		("threads", options::value<int>()->default_value(8), "set default number of threads")
+		("target", options::value<int>()->default_value(0), "set target, 0 for SDL, 1 for Headless")
+		("auto-quit", options::value<bool>()->default_value(false)->implicit_value(true), "set auto-quit for profiling")
+		("full-screen", options::value<bool>()->default_value(false)->implicit_value(true), "set full-screen (non headless targets)")
+		("engine", options::value<int>()->default_value(0), "set engine, 0 for JBikker, 1 for Noise")
+	;
+
+	options::variables_map vm;
+	options::store(options::parse_command_line(argc, argv, desc), vm);
+	options::notify(vm);
+
+	if (vm.count("help")) {
+		std::cout << desc << "\n";
+#pragma warning( push ) 
+#pragma warning( disable : 6031) 
+		_getch();
+#pragma warning( pop ) 
+		return 1;
+	}
+
+	int width = getParameter<int>(vm, "width");
+	int height = getParameter<int>(vm, "height");
+	bool test_continue = getParameter<bool>(vm, "continue");
+	int test_continue_times = getParameter<int>(vm, "continue-times");
+	int no_threads = getParameter<int>(vm, "threads");
+	int target_number = getParameter<int>(vm, "target");
+
+	bool auto_quit = getParameter<bool>(vm, "auto-quit");
+	bool full_screen = getParameter<bool>(vm, "full-screen");
+	int engine_number = getParameter<int>(vm, "engine");
 
 	pixel* image = new pixel[width * height];
+	Target* target;
+	switch (target_number) {
+	case 0: 
+		target = new SDLTarget(image, width, height, full_screen);
+		break;
+	case 1:
+	default:
+		target = new Headless();
+		break;
+	}
+	target->set_auto_continue(test_continue);
 
-	// Headless target;
-	SDLTarget target(image, width, height, full_screen);
-	target.set_auto_continue(test_continue);
-
-	// Attempt1::JBEngine ta;
-	JBikker::Engine engine;
-	// Raytracer engine;
-	// Noise engine;
+	WorkEngine* engine;
+	switch (engine_number) {
+	case 0:
+		engine = new JBikker::Engine();
+		break;
+	case 1:
+	default:
+		engine = new Noise();
+		break;
+	}
+	
 	if (test_continue) {
 		for (int ii = 0; ii < test_continue_times; ii++) {
 			run_engine(no_threads, width, height, engine, image, target, false, true);
@@ -170,7 +224,7 @@ int main(int argc, char *argv[]) {
 		run_engine(no_threads, width, height, engine, image, target, true, true);
 	}
 
-	target.stop();
+	target->stop();
 	delete[] image;
 	if (!auto_quit) {
 		std::cin.clear();
